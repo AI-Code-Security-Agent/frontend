@@ -32,8 +32,13 @@ import {
 } from "lucide-react"
 import { useChat } from "@/hooks/use-chat"
 import { apiService } from "@/lib/api"
+import Cookies from "js-cookie";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation"
+const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export default function DashboardPage() {
+  const router = useRouter();
   const { messages, sendMessage, clearChat, isLoading, error, clearError } = useChat();
   const [input, setInput] = useState("");
   const [isConnected, setIsConnected] = useState(false);
@@ -51,7 +56,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const checkConnection = async () => {
       try {
-        await apiService.healthCheck();
+        // await apiService.healthCheck();
         setIsConnected(true);
         setConnectionError(null);
       } catch (err) {
@@ -96,8 +101,39 @@ export default function DashboardPage() {
     }
   };
 
+   const handleLogout = async (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+    const token = Cookies.get("accessToken");
+    if (!token) {
+      console.log("Access token not found.");
+      return;
+    }
+    try {
+      const response = await fetch(`${baseURL}/auth/logout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (data.isSuccess) {
+        Cookies.remove("accessToken");
+        Cookies.remove("userName");
+        router.push("/");
+        toast.success(data.message);
+      } else {
+        toast.error("Logout failed. Please try again.");
+      }
+    } catch (err) {
+      console.log("error :", err);
+      toast.error("An error occurred while logging out.");
+    }
+  };
+
   return (
-    <div className="flex h-screen">
+    <div className="flex max-h-screen max-w-full">
       {/* Sidebar */}
       <div className="w-64 border-r bg-muted/40">
         <div className="flex h-14 items-center border-b px-4">
@@ -204,6 +240,21 @@ export default function DashboardPage() {
                 Key Information
               </Button>
             </div>
+
+             {/* Chat History */}
+            <div className="space-y-2">
+              <h2 className="text-sm font-semibold">Recent Chats</h2>
+              <div className="space-y-1">
+                <Button variant="ghost" className="w-full justify-start text-sm">
+                  <MessageSquarePlus className="mr-2 h-4 w-4" />
+                  Project Discussion
+                </Button>
+                <Button variant="ghost" className="w-full justify-start text-sm">
+                  <MessageSquarePlus className="mr-2 h-4 w-4" />
+                  Code Review
+                </Button>
+              </div>
+            </div>
           </div>
           
           {/* User Menu */}
@@ -215,6 +266,9 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-center space-x-2">
                 <ThemeToggle />
+                <Button variant="ghost" title="Log Out" size="icon" onClick={handleLogout} className="cursor-pointer">
+                  <LogOut className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </div>
@@ -222,7 +276,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col w-full">
         {/* Error Alert */}
         {(error || connectionError) && (
           <Alert className="m-4 mb-0">
