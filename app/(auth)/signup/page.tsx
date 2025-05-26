@@ -1,41 +1,81 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import Link from "next/link"
-import { Code, Mail, Lock, User, Github } from "lucide-react"
+const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
+import { Code, Mail, Lock, User, Github, Target } from "lucide-react";
+import { UserTypes } from "@/types/user";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
-// This is just for demonstration
 export default function SignUpPage() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [showUserForm, setShowUserForm] = useState(false)
+
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [showUserForm, setShowUserForm] = useState(false);
+  const [newUserDetails, setNewUserDetails] = useState<UserTypes>({
+    firstname: "",
+    lastname: "",
+    email: "",
+    gitAccessToken: "",
+  });
 
   // Temporary function to demonstrate the flow
   const handleGithubSignIn = () => {
-    setIsLoading(true)
+    setIsLoading(true);
     // Simulate API call
     setTimeout(() => {
-      setShowUserForm(true)
-      setIsLoading(false)
-    }, 1500)
-  }
+      setShowUserForm(true);
+      setIsLoading(false);
+    }, 1500);
+  };
 
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
-      alert('Registration would be completed here!')
-    }, 1500)
-  }
+  const hndleCreateUser = async(e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    if (
+      !newUserDetails.firstname ||
+      !newUserDetails.lastname ||
+      !newUserDetails.email
+    ) {
+      toast.warning("Please Fill all the fields.");
+      setIsLoading(false);
+      return;
+    }
+    const payload = {
+      firstname: newUserDetails.firstname,
+      lastname: newUserDetails.lastname,
+      email: newUserDetails.email,
+      gitAccessToken: "not define",
+    };
+
+   try {
+    const response = await fetch(`${baseURL}/users/createuser`,{
+      method:"POST",
+      headers : {
+        "Content-Type" : "application/json"
+      },
+      body : JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+    if(result.isSuccess) {
+      toast.success(result.message);
+      router.push("/login");
+    }else {
+      toast.error(result.message || "Failed to create User.")
+    }
+    
+   } catch (err) {
+    toast.error("An error occurred while creating the user.");
+   }finally{
+    setIsLoading(false)
+   }
+  };
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-background/95 p-4">
@@ -65,64 +105,71 @@ export default function SignUpPage() {
                 {isLoading ? "Connecting..." : "Connect with GitHub"}
               </Button>
               <p className="text-sm text-muted-foreground text-center mt-4">
-                We need access to your GitHub account to analyze your repositories
+                We need access to your GitHub account to analyze your
+                repositories
               </p>
             </CardContent>
           ) : (
-            <form onSubmit={onSubmit}>
+            <form onSubmit={hndleCreateUser}>
               <CardContent className="grid gap-4 pt-6">
                 <div className="flex items-center justify-center text-sm text-green-600 mb-2">
                   <Github className="mr-2 h-5 w-5" />
                   GitHub Connected Successfully
                 </div>
                 <div className="grid gap-2">
-                  <Label className="text-sm font-medium" htmlFor="username">
-                    Choose Username
+                  <Label className="text-sm font-medium" htmlFor="FirstName">
+                    Enter First name
                   </Label>
                   <div className="relative">
                     <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                     <Input
-                      id="username"
-                      name="username"
+                      id="FirstName"
+                      name="FirstName"
                       type="text"
-                      placeholder="preferred_username"
+                      placeholder="Enater Your First name"
                       className="pl-10"
-                      required
+                      value={newUserDetails.firstname}
+                      onChange={(e) => setNewUserDetails({...newUserDetails,firstname:e.target.value})}
                     />
                   </div>
                 </div>
                 <div className="grid gap-2">
-                  <Label className="text-sm font-medium" htmlFor="password">
-                    Create Password
+                  <Label className="text-sm font-medium" htmlFor="LastName">
+                    Enter Last name
                   </Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                    <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                     <Input
-                      id="password"
-                      name="password"
-                      type="password"
+                      id="FirstName"
+                      name="FirstName"
+                      type="text"
+                      placeholder="Enater Your Last name"
                       className="pl-10"
-                      required
+                      value={newUserDetails.lastname}
+                      onChange={(e) => setNewUserDetails({...newUserDetails,lastname:e.target.value})}
                     />
                   </div>
                 </div>
                 <div className="grid gap-2">
-                  <Label className="text-sm font-medium" htmlFor="confirm-password">
-                    Confirm Password
+                  <Label className="text-sm font-medium" htmlFor="email">
+                    Enter E-mail
                   </Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                    <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                     <Input
-                      id="confirm-password"
-                      name="confirm-password"
-                      type="password"
+                      id="email"
+                      name="email"
+                      type="email"
                       className="pl-10"
+                      placeholder="Enater Your E-mail"
                       required
+                      value={newUserDetails.email}
+                      onChange={(e) => setNewUserDetails({...newUserDetails,email:e.target.value})}
                     />
                   </div>
                 </div>
-                <Button 
-                  className="w-full font-medium" 
+                <Button
+                  className="w-full font-medium"
                   type="submit"
                   size="lg"
                   disabled={isLoading}
@@ -164,5 +211,5 @@ export default function SignUpPage() {
         </p>
       </div>
     </div>
-  )
+  );
 }
