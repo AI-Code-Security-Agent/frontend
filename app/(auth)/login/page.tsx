@@ -1,26 +1,60 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import Link from "next/link"
-import { Code, Mail, Lock } from "lucide-react"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
+import { Code, Mail, Lock } from "lucide-react";
+import { useRouter } from "next/navigation";
+import Cookies from 'js-cookie';
+import { toast } from "sonner";
+import Email from "next-auth/providers/email";
+const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export default function LoginPage() {
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
+  const [username, setusername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const router = useRouter();
 
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setIsLoading(true)
-    // TODO: Implement login logic
-    setTimeout(() => setIsLoading(false), 3000)
-  }
+  const handleUserLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`${baseURL}/auth/login`, {
+        method :'POST',
+        headers : {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: username,
+          password : password
+        })
+      })
+
+      const result = await response.json();
+      if(result.isSuccess){
+        Cookies.set("accessToken", result.accessToken , {expires:1})
+        Cookies.set("userName", result.username , {expires:1})
+        toast.success(result.message)
+        router.push('/dashboard')
+        setIsLoading(false)
+      }else{
+        setIsLoading(false);
+        toast.error(result.message);
+      }
+      
+    } catch (err) {
+      console.log("Error during login:", err);
+      toast.error("An error occurred. Please try again later.");
+    }finally{
+      setIsLoading(false)
+    }
+
+  };
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-background/95 p-4">
@@ -38,7 +72,7 @@ export default function LoginPage() {
         </div>
 
         <Card className="border-2">
-          <form onSubmit={onSubmit}>
+          <form onSubmit={handleUserLogin}>
             <CardContent className="grid gap-4 pt-6">
               <div className="grid gap-2">
                 <Label className="text-sm font-medium" htmlFor="email">
@@ -51,6 +85,8 @@ export default function LoginPage() {
                     type="email"
                     placeholder="name@example.com"
                     className="pl-10"
+                    value={username}
+                    onChange={(e) => setusername(e.target.value)}
                     required
                   />
                 </div>
@@ -65,13 +101,15 @@ export default function LoginPage() {
                     id="password"
                     type="password"
                     className="pl-10"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     required
                   />
                 </div>
               </div>
-              <Button 
-                className="w-full font-medium" 
-                type="submit" 
+              <Button
+                className="w-full font-medium"
+                type="submit"
                 size="lg"
                 disabled={isLoading}
               >
@@ -101,5 +139,5 @@ export default function LoginPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
