@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -78,5 +79,85 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Animated gradient text classes */
+@layer components {
+  .gradient-text {
+    @apply font-montserrat bg-clip-text text-transparent;
+    background-image: linear-gradient(
+      45deg,
+      #3b82f6,
+      #ec4899,
+      #000000,
+      #3b82f6,
+      #ec4899
+    );
+    background-size: 300% 300%;
+    animation: gradient-shift 10s ease-in-out infinite;
+  }
+
+  .dark .gradient-text {
+    background-image: linear-gradient(
+      45deg,
+      #60a5fa,
+      #f472b6,
+      #ffffff,
+      #60a5fa,
+      #f472b6
+    );
+    background-size: 300% 300%;
+    animation: gradient-shift 10s ease-in-out infinite;
+  }
+
+  .gradient-text-subtitle {
+    @apply font-montserrat bg-clip-text text-transparent;
+    background-image: linear-gradient(
+      90deg,
+      #6366f1,
+      #ec4899,
+      #374151,
+      #6366f1
+    );
+    background-size: 200% 200%;
+    animation: gradient-shift-slow 11s ease-in-out infinite;
+  }
+
+  .dark .gradient-text-subtitle {
+    background-image: linear-gradient(
+      90deg,
+      #818cf8,
+      #f472b6,
+      #e5e7eb,
+      #818cf8
+    );
+    background-size: 200% 200%;
+    animation: gradient-shift-slow 12s ease-in-out infinite;
+  }
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes gradient-shift-slow {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Montserrat font utility */
+@layer utilities {
+  .font-montserrat {
+    font-family: 'Montserrat', var(--font-montserrat, sans-serif);
   }
 }

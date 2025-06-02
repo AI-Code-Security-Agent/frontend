@@ -26,12 +26,12 @@ export default function Home() {
 
       <main className="flex min-h-screen flex-col items-center justify-center gap-6 pb-8 pt-6 md:py-10">
         <div className="flex max-w-[980px] flex-col items-center gap-2 px-4">
-          <h1 className="text-center text-4xl font-extrabold leading-tight tracking-tighter sm:text-5xl md:text-6xl">
+          <h1 className="gradient-text text-center text-4xl font-semibold sm:text-5xl md:text-6xl">
             AI-Powered Code Security <br className="hidden sm:inline" />
             Analysis & Protection
           </h1>
           <p className="max-w-[700px] text-lg text-muted-foreground text-center">
-            Analyze your code for security vulnerabilities, get intelligent recommendations, 
+            Analyze your code for security vulnerabilities, get intelligent recommendations,
             and ensure your applications are protected against potential threats.
           </p>
         </div>

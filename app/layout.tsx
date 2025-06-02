@@ -1,11 +1,16 @@
+// layout.tsx
 import './globals.css';
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Montserrat } from 'next/font/google';
 import { ThemeProvider } from "@/components/theme-provider";
-import { Header } from "@/components/header";
+// import { Header } from "@/components/header";
 import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ['latin'] });
+const montserrat = Montserrat({ 
+  subsets: ['latin'],
+  variable: '--font-montserrat',
+});
 
 export const metadata: Metadata = {
   title: 'CodeGuardian - AI-Powered Code Security Analysis',
@@ -19,7 +24,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`${inter.className} ${montserrat.variable}`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
