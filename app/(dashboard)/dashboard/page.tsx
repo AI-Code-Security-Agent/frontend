@@ -45,7 +45,7 @@ export default function DashboardPage() {
   
   // Settings state
   const [ragSettings, setRagSettings] = useState({
-    k: 3,
+    k: 5,
     relevance_threshold: 0.1
   });
   
