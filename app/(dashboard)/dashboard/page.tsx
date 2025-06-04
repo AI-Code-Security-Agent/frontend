@@ -19,7 +19,9 @@ import {
   Trash2, 
   AlertCircle,
   Settings,
-  X
+  X,
+  Menu,
+  ChevronLeft
 } from "lucide-react"
 import { useUnifiedChat } from "@/hooks/use-chat"
 import { apiService } from "@/lib/api"
@@ -39,6 +41,7 @@ export default function DashboardPage() {
   const [llmConnected, setLlmConnected] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [sidebarVisible, setSidebarVisible] = useState(true);
   
   // Settings state
   const [ragSettings, setRagSettings] = useState({
@@ -163,15 +166,29 @@ export default function DashboardPage() {
     }
   };
 
+  const toggleSidebar = () => {
+    setSidebarVisible(!sidebarVisible);
+  };
+
   const isCurrentModelConnected = selectedModel === 'rag' ? ragConnected : llmConnected;
 
   return (
     <div className="flex max-h-screen max-w-full">
       {/* Sidebar */}
-      <div className="w-64 border-r bg-muted/40">
-        <div className="flex h-14 items-center border-b px-4">
-          <Bot className="h-6 w-6" />
-          <span className="ml-2 font-bold">AI Assistant</span>
+      <div className={`${sidebarVisible ? 'w-64' : 'w-0'} border-r bg-muted/40 transition-all duration-300 ease-in-out overflow-hidden`}>
+        <div className="flex h-14 items-center justify-between border-b px-4">
+          <div className="flex items-center">
+            <Bot className="h-6 w-6" />
+            <span className="ml-2 font-bold">Code Guardian</span>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleSidebar}
+            className="h-8 w-8"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
         </div>
         
         <div className="flex flex-col h-[calc(100vh-3.5rem)]">
@@ -270,11 +287,12 @@ export default function DashboardPage() {
           <div className="border-t p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <User className="h-6 w-6" />
+                <User className="h-4 w-4" />
                 <span className="ml-2">User</span>
               </div>
               <div className="flex items-center space-x-2">
-                <ThemeToggle />
+                {sidebarVisible && (
+                  <ThemeToggle />)}
                 <Button variant="ghost" title="Log Out" size="icon" onClick={handleLogout} className="cursor-pointer">
                   <LogOut className="h-4 w-4" />
                 </Button>
@@ -286,6 +304,30 @@ export default function DashboardPage() {
 
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col w-full">
+        {/* Header with sidebar toggle when sidebar is hidden */}
+        {!sidebarVisible && (
+          <div className="flex items-center justify-between h-14 border-b px-4">
+            <div className="flex items-center">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleSidebar}
+                className="h-8 w-8 mr-2"
+              >
+                <Menu className="h-4 w-4" />
+              </Button>
+              <Bot className="h-6 w-6" />
+              <span className="ml-2 font-bold">Code Guardian</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <ThemeToggle />
+              <Button variant="ghost" title="Log Out" size="icon" onClick={handleLogout} className="cursor-pointer">
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Error Alert */}
         {(error || connectionError) && (
           <Alert className="m-4 mb-0">
