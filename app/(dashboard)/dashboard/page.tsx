@@ -43,7 +43,7 @@ export default function DashboardPage() {
   // Settings state
   const [ragSettings, setRagSettings] = useState({
     k: 3,
-    relevance_threshold: 0.3
+    relevance_threshold: 0.1
   });
   
   const [llmSettings, setLlmSettings] = useState({

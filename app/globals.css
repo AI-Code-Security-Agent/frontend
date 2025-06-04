@@ -161,3 +161,37 @@
     font-family: 'Montserrat', var(--font-montserrat, sans-serif);
   }
 }
+
+/* Light mode styles */
+.prism-code .token.comment {
+  color: #6a737d;
+}
+.prism-code .token.keyword {
+  color: #005cc5;
+}
+.prism-code .token.string {
+  color: #032f62;
+}
+.prism-code .token.function {
+  color: #6f42c1;
+}
+.prism-code .token.number {
+  color: #164e63;
+}
+
+/* Dark mode styles */
+.dark .prism-code .token.comment {
+  color: #565f89;
+}
+.dark .prism-code .token.keyword {
+  color: #79c0ff;
+}
+.dark .prism-code .token.string {
+  color: #9ecbff;
+}
+.dark .prism-code .token.function {
+  color: #d2a8ff;
+}
+.dark .prism-code .token.number {
+  color: #89dceb;
+}
