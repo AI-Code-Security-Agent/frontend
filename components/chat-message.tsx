@@ -249,22 +249,22 @@ export function ChatMessage({ message }: ChatMessageProps) {
             <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
           </div>
         </div>
-        <Avatar className="h-10 w-10">
+        {/* <Avatar className="h-10 w-10">
           <AvatarFallback className="bg-primary text-primary-foreground">
             <User className="h-5 w-5" />
           </AvatarFallback>
-        </Avatar>
+        </Avatar> */}
       </div>
     )
   }
 
   return (
     <div className="flex justify-start space-x-3 mb-6">
-      <Avatar className="h-10 w-10">
+      {/* <Avatar className="h-10 w-10">
         <AvatarFallback className="bg-muted">
           <Bot className="h-5 w-5" />
         </AvatarFallback>
-      </Avatar>
+      </Avatar> */}
       <div className="max-w-[85%] space-y-3">
         <div className="flex items-center space-x-2">
           <Badge variant="outline" className={modelColor}>
