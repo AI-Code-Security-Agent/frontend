@@ -11,6 +11,7 @@ import { Code, Mail, Lock, User, Github, Target } from "lucide-react";
 import { UserTypes } from "@/types/user";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { CosmicLayout } from "@/app/cosmic-layout";
 
 export default function SignUpPage() {
 
@@ -79,6 +80,7 @@ export default function SignUpPage() {
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-background/95 p-4">
+      <CosmicLayout>
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[400px]">
         <div className="flex flex-col space-y-2 text-center">
           <div className="flex items-center justify-center">
@@ -210,6 +212,7 @@ export default function SignUpPage() {
           .
         </p>
       </div>
+      </CosmicLayout>
     </div>
   );
 }

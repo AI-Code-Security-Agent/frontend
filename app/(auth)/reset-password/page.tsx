@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Code, Mail, Lock } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { CosmicLayout } from "@/app/cosmic-layout";
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export default function ForgotPasswordPage() {
@@ -107,6 +108,7 @@ useEffect(() => {
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-background/95 p-4">
+      <CosmicLayout>
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[400px]">
         <div className="flex flex-col space-y-2 text-center">
           <div className="flex items-center justify-center">
@@ -165,6 +167,7 @@ useEffect(() => {
           </form>
         </Card>
       </div>
+      </CosmicLayout>
     </div>
   );
 }
