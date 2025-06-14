@@ -6,20 +6,22 @@ import Link from "next/link";
 export default function Home() {
   return (
     <div className="min-h-screen min-w-full bg-background">
-      <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 w-full">
-        <div className="flex h-14 items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center space-x-2">
-            <Code className="h-6 w-6 text-primary" />
-            <span className="font-bold">CodeGuardian</span>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Link href="/login">
-              <Button variant="ghost">Login</Button>
-            </Link>
-            <Link href="/signup">
-              <Button>Sign Up</Button>
-            </Link>
-            <ThemeToggle />
+      <header className="fixed top-4 left-4 right-4 z-50 mx-auto max-w-6xl">
+        <div className="bg-white/10 dark:bg-black/10 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl shadow-black/10 dark:shadow-black/30">
+          <div className="flex h-14 items-center justify-between px-6 sm:px-8 lg:px-10">
+            <div className="flex items-center space-x-2">
+              <Code className="h-6 w-6 text-primary" />
+              <span className="font-bold text-gray-900 dark:text-white">CodeGuardian</span>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Link href="/login">
+                <Button variant="ghost" className="hover:bg-white/10 dark:hover:bg-white/5">Login</Button>
+              </Link>
+              <Link href="/signup">
+                <Button variant="ghost" className="bg-white/20 dark:bg-white/10 hover:bg-white/30 dark:hover:bg-white/20 border border-white/30 dark:border-white/20 backdrop-blur-sm">Sign Up</Button>
+              </Link>
+              <ThemeToggle />
+            </div>
           </div>
         </div>
       </header>
