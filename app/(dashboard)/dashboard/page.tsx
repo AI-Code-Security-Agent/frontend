@@ -218,7 +218,7 @@ export default function DashboardPage() {
           <div className="flex-1 overflow-auto p-4">
             <Button
               variant="outline"
-              className="w-full justify-start mb-3 rounded-full"
+              className="w-full justify-start mb-2 rounded-full text-sm"
               onClick={clearChat}
               disabled={isLoading}
             >
@@ -228,7 +228,7 @@ export default function DashboardPage() {
 
             <Button
               variant="outline"
-              className="w-full justify-start mb-3 rounded-full"
+              className="w-full justify-start mb-3 rounded-full text-sm"
               onClick={() => setShowSettings(!showSettings)}
             >
               <Settings className="mr-2 h-4 w-4" />
