@@ -1,9 +1,5 @@
-"use client"
-
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { 
   Bot, 
@@ -22,8 +18,7 @@ import {
 import { ChatMessage as ChatMessageType } from "@/lib/types"
 import { useState, useCallback } from "react"
 import { toast } from "sonner"
-import { Highlight } from 'prism-react-renderer' // Import Highlight for syntax highlighting
-
+import { Highlight } from 'prism-react-renderer'
 interface ChatMessageProps {
   message: ChatMessageType
 }

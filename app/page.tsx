@@ -45,7 +45,7 @@ export default function Home() {
 
           <div className="flex gap-4">
             <Link href="/signup">
-              <Button size="lg" className="h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0">
+              <Button size="lg" className="h-12 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white border-0">
                 Analyze Your Code
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>

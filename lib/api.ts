@@ -73,7 +73,11 @@ class UnifiedApiService {
 
   async ragHealthCheck(): Promise<{ status: string }> {
     try {
-      const response = await this.fetchWithTimeout(
+      // const response = await this.fetchWithTimeout(
+      //   `${this.ragBaseUrl}${API_CONFIG.RAG_API.ENDPOINTS.HEALTH}`,
+      //   { method: 'GET' }
+      // );
+      const response = await fetch(
         `${this.ragBaseUrl}${API_CONFIG.RAG_API.ENDPOINTS.HEALTH}`,
         { method: 'GET' }
       );
