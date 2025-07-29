@@ -1,11 +1,13 @@
-import { API_CONFIG, ModelType } from '@/config/api';
-import { 
-  QueryRequest, 
-  QueryResponse, 
-  LLMChatRequest, 
-  LLMChatResponse, 
-  ApiError 
-} from './types';
+import { API_CONFIG, ModelType } from "@/config/api";
+import {
+  QueryRequest,
+  QueryResponse,
+  LLMChatRequest,
+  LLMChatResponse,
+  ApiError,
+} from "./types";
+
+const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
 class UnifiedApiService {
   private ragBaseUrl: string;
@@ -29,7 +31,7 @@ class UnifiedApiService {
         ...options,
         signal: controller.signal,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           ...options.headers,
         },
       });
@@ -47,7 +49,7 @@ class UnifiedApiService {
       const response = await this.fetchWithTimeout(
         `${this.ragBaseUrl}${API_CONFIG.RAG_API.ENDPOINTS.QUERY}`,
         {
-          method: 'POST',
+          method: "POST",
           body: JSON.stringify(request),
         }
       );
@@ -56,39 +58,18 @@ class UnifiedApiService {
         const errorData: ApiError = await response.json().catch(() => ({
           detail: `HTTP ${response.status}: ${response.statusText}`,
         }));
-        throw new Error(errorData.detail || 'RAG query failed');
+        throw new Error(errorData.detail || "RAG query failed");
       }
 
       return await response.json();
     } catch (error) {
       if (error instanceof Error) {
-        if (error.name === 'AbortError') {
-          throw new Error('RAG request timed out. Please try again.');
+        if (error.name === "AbortError") {
+          throw new Error("RAG request timed out. Please try again.");
         }
         throw error;
       }
-      throw new Error('An unexpected error occurred with RAG API');
-    }
-  }
-
-  async ragHealthCheck(): Promise<{ status: string }> {
-    try {
-      // const response = await this.fetchWithTimeout(
-      //   `${this.ragBaseUrl}${API_CONFIG.RAG_API.ENDPOINTS.HEALTH}`,
-      //   { method: 'GET' }
-      // );
-      const response = await fetch(
-        `${this.ragBaseUrl}${API_CONFIG.RAG_API.ENDPOINTS.HEALTH}`,
-        { method: 'GET' }
-      );
-
-      if (!response.ok) {
-        throw new Error(`RAG health check failed: ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw new Error('Failed to connect to RAG API');
+      throw new Error("An unexpected error occurred with RAG API");
     }
   }
 
@@ -98,7 +79,7 @@ class UnifiedApiService {
       const response = await this.fetchWithTimeout(
         `${this.llmBaseUrl}${API_CONFIG.LLM_API.ENDPOINTS.CHAT}`,
         {
-          method: 'POST',
+          method: "POST",
           body: JSON.stringify(request),
         }
       );
@@ -107,42 +88,25 @@ class UnifiedApiService {
         const errorData: ApiError = await response.json().catch(() => ({
           detail: `HTTP ${response.status}: ${response.statusText}`,
         }));
-        throw new Error(errorData.detail || 'LLM chat failed');
+        throw new Error(errorData.detail || "LLM chat failed");
       }
 
       return await response.json();
     } catch (error) {
       if (error instanceof Error) {
-        if (error.name === 'AbortError') {
-          throw new Error('LLM request timed out. Please try again.');
+        if (error.name === "AbortError") {
+          throw new Error("LLM request timed out. Please try again.");
         }
         throw error;
       }
-      throw new Error('An unexpected error occurred with LLM API');
-    }
-  }
-
-  async llmHealthCheck(): Promise<{ message: string; model: string; active_sessions: number }> {
-    try {
-      const response = await this.fetchWithTimeout(
-        `${this.llmBaseUrl}${API_CONFIG.LLM_API.ENDPOINTS.HEALTH}`,
-        { method: 'GET' }
-      );
-
-      if (!response.ok) {
-        throw new Error(`LLM health check failed: ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw new Error('Failed to connect to LLM API');
+      throw new Error("An unexpected error occurred with LLM API");
     }
   }
 
   // Unified method for both APIs
   async sendMessage(
-    message: string, 
-    modelType: ModelType, 
+    message: string,
+    modelType: ModelType,
     options: {
       // RAG options
       k?: number;
@@ -158,7 +122,7 @@ class UnifiedApiService {
     sessionId?: string;
     messageCount?: number;
   }> {
-    if (modelType === 'rag') {
+    if (modelType === "rag") {
       const response = await this.ragQuery({
         question: message,
         k: options.k,
@@ -183,9 +147,48 @@ class UnifiedApiService {
     }
   }
 
+  async ragHealthCheck(): Promise<{ status: string }> {
+    try {
+      const response = await fetch(
+        `${this.ragBaseUrl}${API_CONFIG.RAG_API.ENDPOINTS.HEALTH}`,
+        { method: "GET" }
+      );
+      if (!response.ok) {
+        throw new Error(`RAG health check failed: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw new Error("Failed to connect to RAG API");
+    }
+  }
+
+  // updated llm healthcheck function
+  async llmHealthCheck(): Promise<{
+    message: string;
+    model: string;
+    active_sessions: number;
+  }> {
+    try {
+      const response = await fetch(
+        `${baseURL}${API_CONFIG.LLM_API.ENDPOINTS.HEALTH}`,
+        { method: "GET" }
+      );
+
+      if (!response.ok) {
+        throw new Error(`LLM health check failed: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error in LLM Health Check:", error);
+      throw new Error("Failed to connect to LLM API");
+    }
+  }
+
   async healthCheck(modelType: ModelType): Promise<boolean> {
     try {
-      if (modelType === 'rag') {
+      if (modelType === "rag") {
         await this.ragHealthCheck();
       } else {
         await this.llmHealthCheck();
