@@ -6,6 +6,7 @@ import {
   LLMChatResponse,
   ApiError,
 } from "./types";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -76,14 +77,20 @@ class UnifiedApiService {
   // LLM API Methods
   async llmChat(request: LLMChatRequest): Promise<LLMChatResponse> {
     try {
-      const response = await this.fetchWithTimeout(
-        `${this.llmBaseUrl}${API_CONFIG.LLM_API.ENDPOINTS.CHAT}`,
-        {
-          method: "POST",
-          body: JSON.stringify(request),
-        }
-      );
+      // const response = await this.fetchWithTimeout(
+      //   `${this.llmBaseUrl}${API_CONFIG.LLM_API.ENDPOINTS.CHAT}`,
+      //   {
+      //     method: "POST",
+      //     body: JSON.stringify(request),
+      //   }
+      // );
 
+      const url = `${this.llmBaseUrl}${API_CONFIG.LLM_API.ENDPOINTS.CHAT}`;
+      const response = await fetchWithAuth(url, {
+        method: "POST",
+        body: JSON.stringify(request),
+      });
+      
       if (!response.ok) {
         const errorData: ApiError = await response.json().catch(() => ({
           detail: `HTTP ${response.status}: ${response.statusText}`,
@@ -147,12 +154,18 @@ class UnifiedApiService {
     }
   }
 
+  // updated RAG healthcheck function
   async ragHealthCheck(): Promise<{ status: string }> {
     try {
-      const response = await fetch(
-        `${this.ragBaseUrl}${API_CONFIG.RAG_API.ENDPOINTS.HEALTH}`,
-        { method: "GET" }
-      );
+      // const response = await fetch(
+      //   `${this.ragBaseUrl}${API_CONFIG.RAG_API.ENDPOINTS.HEALTH}`,
+      //   { method: "GET" }
+      // );
+
+      const url = `${this.llmBaseUrl}${API_CONFIG.RAG_API.ENDPOINTS.HEALTH}`;
+      const response = await fetchWithAuth(url, {
+        method: "GET",
+      });
       if (!response.ok) {
         throw new Error(`RAG health check failed: ${response.statusText}`);
       }
@@ -163,17 +176,22 @@ class UnifiedApiService {
     }
   }
 
-  // updated llm healthcheck function
+  // updated LLM healthcheck function
   async llmHealthCheck(): Promise<{
     message: string;
     model: string;
     active_sessions: number;
   }> {
     try {
-      const response = await fetch(
-        `${baseURL}${API_CONFIG.LLM_API.ENDPOINTS.HEALTH}`,
-        { method: "GET" }
-      );
+      // const response = await fetch(
+      //   `${baseURL}${API_CONFIG.LLM_API.ENDPOINTS.HEALTH}`,
+      //   { method: "GET" }
+      // );
+
+      const url = `${this.llmBaseUrl}${API_CONFIG.LLM_API.ENDPOINTS.HEALTH}`;
+      const response = await fetchWithAuth(url, {
+        method: "GET",
+      });
 
       if (!response.ok) {
         throw new Error(`LLM health check failed: ${response.statusText}`);

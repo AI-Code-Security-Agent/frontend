@@ -39,7 +39,7 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
 
     const userMessage: ChatMessage = {
       id: crypto.randomUUID(),
-      role: 'user',
+      role: 'user', 
       content: content.trim(),
       timestamp: new Date(),
       modelType,
@@ -64,10 +64,14 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
         session_id: modelType === 'llm' ? currentSessionId || undefined : undefined,
       });
 
+      console.log("response for look session id:", response);
+
       // Update session ID for LLM
       if (modelType === 'llm' && response.sessionId) {
         setCurrentSessionId(response.sessionId);
       }
+
+      console.log("content:", response);
 
       const assistantMessage: ChatMessage = {
         id: crypto.randomUUID(),
@@ -95,6 +99,8 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
       setIsLoading(false);
     }
   }, [currentSessionId, options]);
+
+  console.log("messages", messages);
 
   return {
     messages,
