@@ -42,7 +42,7 @@ const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { messages, sendMessage, clearChat, isLoading, error, clearError } = useUnifiedChat();
+  const { messages, sendMessage, clearChat, isLoading, error, clearError,loadSessionMessages } = useUnifiedChat();
   const [input, setInput] = useState("");
   const [selectedModel, setSelectedModel] = useState<ModelType>('rag');
   const [ragConnected, setRagConnected] = useState(false);
@@ -51,6 +51,13 @@ export default function DashboardPage() {
   const [showSettings, setShowSettings] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    const sessionId = Cookies.get('sessionId');
+    if (sessionId) {
+      loadSessionMessages(sessionId);
+    }
+  }, [  loadSessionMessages ]);
 
   // Settings state
   const [ragSettings, setRagSettings] = useState({

@@ -28,9 +28,9 @@ export const API_CONFIG = {
   LLM_API: {
     BASE_URL: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:4000',
     ENDPOINTS: {
-      CHAT: '/chat/messages',
+      CHAT: '/chat/messages_llm',
       HEALTH: '/chat/health_llm',
-      SESSIONS: '/sessions',
+      SESSIONS: '/chat/sessions',
     },
   },
   TIMEOUT: 30000, // 30 seconds

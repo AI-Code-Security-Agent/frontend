@@ -7,6 +7,7 @@ import {
   ApiError,
 } from "./types";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
+import { ChatMessage } from '@/lib/types';
 
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -173,6 +174,26 @@ class UnifiedApiService {
       return await response.json();
     } catch (error) {
       throw new Error("Failed to connect to RAG API");
+    }
+  }
+
+  async getSessionMessages(sessionId: string): Promise<ChatMessage[]> {
+    try {
+      const response = await fetchWithAuth(
+        `${this.llmBaseUrl}${API_CONFIG.LLM_API.ENDPOINTS.SESSIONS}/${sessionId}/messages`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch session messages: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching session messages:", error);
+      throw new Error("Failed to connect to LLM API");
     }
   }
 

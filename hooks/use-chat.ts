@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { ChatMessage } from '@/lib/types';
 import { apiService } from '@/lib/api';
 import { ModelType } from '@/config/api';
+import Cookies from 'js-cookie';
 
 interface UseChatOptions {
   onError?: (error: string) => void;
@@ -69,9 +70,10 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
       // Update session ID for LLM
       if (modelType === 'llm' && response.sessionId) {
         setCurrentSessionId(response.sessionId);
+        Cookies.set('sessionId', response.sessionId, { expires: 1 });
       }
 
-      console.log("content:", response);
+      // console.log("content:", response);
 
       const assistantMessage: ChatMessage = {
         id: crypto.randomUUID(),
@@ -100,6 +102,33 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
     }
   }, [currentSessionId, options]);
 
+  const loadSessionMessages = useCallback(async (sessionId: string) => {
+  try {
+    setIsLoading(true);
+    const response = await apiService.getSessionMessages(sessionId);
+    const loadedMessages: ChatMessage[] = response.map((msg: any) => ({
+      id: msg._id,
+      role: msg.role,
+      content: msg.content,
+      timestamp: new Date(msg.timestamp),
+      modelType: msg.model || 'llm',
+      sessionId: msg.session,
+    }));
+
+    setMessages(loadedMessages);
+    setCurrentSessionId(sessionId);
+    setError(null);
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Failed to load session messages';
+    setError(errorMessage);
+    options.onError?.(errorMessage);
+  } finally {
+    setIsLoading(false);
+  }
+}, []);
+
+
+
   console.log("messages", messages);
 
   return {
@@ -110,5 +139,6 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
     error,
     clearError,
     currentSessionId,
+    loadSessionMessages
   };
 }
