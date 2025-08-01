@@ -5,6 +5,7 @@ import {
   LLMChatRequest,
   LLMChatResponse,
   ApiError,
+  Session
 } from "./types";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { ChatMessage } from '@/lib/types';
@@ -78,13 +79,6 @@ class UnifiedApiService {
   // LLM API Methods
   async llmChat(request: LLMChatRequest): Promise<LLMChatResponse> {
     try {
-      // const response = await this.fetchWithTimeout(
-      //   `${this.llmBaseUrl}${API_CONFIG.LLM_API.ENDPOINTS.CHAT}`,
-      //   {
-      //     method: "POST",
-      //     body: JSON.stringify(request),
-      //   }
-      // );
 
       const url = `${this.llmBaseUrl}${API_CONFIG.LLM_API.ENDPOINTS.CHAT}`;
       const response = await fetchWithAuth(url, {
@@ -180,7 +174,7 @@ class UnifiedApiService {
   async getSessionMessages(sessionId: string): Promise<ChatMessage[]> {
     try {
       const response = await fetchWithAuth(
-        `${this.llmBaseUrl}${API_CONFIG.LLM_API.ENDPOINTS.SESSIONS}/${sessionId}/messages`,
+        `${this.llmBaseUrl}${API_CONFIG.COMMON.ENDPOINTS.SESSIONS_CHATS}/${sessionId}/messages`,
         {
           method: "GET",
         }
@@ -190,9 +184,29 @@ class UnifiedApiService {
         throw new Error(`Failed to fetch session messages: ${response.statusText}`);
       }
 
-      return await response.json();
+      const data = await response.json();
+      console.log('sessions : ', data);
+      return data;
     } catch (error) {
       console.error("Error fetching session messages:", error);
+      throw new Error("Failed to fetch session messages.");
+    }
+  }
+
+  async fetchSessions(): Promise<Session[]> {
+    try {
+      const response = await fetchWithAuth(`${this.llmBaseUrl}${API_CONFIG.COMMON.ENDPOINTS.SESSIONS}`, {
+        method: "GET",
+      });
+
+      console.log('url:', `${this.llmBaseUrl}${API_CONFIG.COMMON.ENDPOINTS.SESSIONS}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch sessions: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching sessions:", error);
       throw new Error("Failed to connect to LLM API");
     }
   }
@@ -204,11 +218,6 @@ class UnifiedApiService {
     active_sessions: number;
   }> {
     try {
-      // const response = await fetch(
-      //   `${baseURL}${API_CONFIG.LLM_API.ENDPOINTS.HEALTH}`,
-      //   { method: "GET" }
-      // );
-
       const url = `${this.llmBaseUrl}${API_CONFIG.LLM_API.ENDPOINTS.HEALTH}`;
       const response = await fetchWithAuth(url, {
         method: "GET",

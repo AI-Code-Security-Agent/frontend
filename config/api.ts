@@ -30,10 +30,17 @@ export const API_CONFIG = {
     ENDPOINTS: {
       CHAT: '/chat/messages_llm',
       HEALTH: '/chat/health_llm',
-      SESSIONS: '/chat/sessions',
+      
     },
+  },
+  COMMON:{
+    BASE_URL: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:4000',
+    ENDPOINTS :{
+      SESSIONS: '/chat/sessions',
+      SESSIONS_CHATS: '/chat/sessions', //chat/sessions/:sessionId/messages
+    }
   },
   TIMEOUT: 30000, // 30 seconds
 } as const;
-
+ 
 export type ModelType = 'rag' | 'llm';

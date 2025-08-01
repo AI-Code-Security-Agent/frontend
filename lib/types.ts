@@ -51,3 +51,10 @@ export interface ApiResponse<T> {
   message: string;
   content: T | null;
 }
+
+export interface Session {
+  _id: string;
+  user: string;
+  title: string;
+  createdAt: string;
+}
