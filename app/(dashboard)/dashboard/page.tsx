@@ -52,6 +52,9 @@ export default function DashboardPage() {
     error,
     clearError,
     loadSessionMessages,
+    sessions,
+    setSessions,
+    fetchSessions,
   } = useUnifiedChat();
   const [input, setInput] = useState("");
   const [selectedModel, setSelectedModel] = useState<ModelType>("rag");
@@ -61,15 +64,8 @@ export default function DashboardPage() {
   const [showSettings, setShowSettings] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
-  const [sessions, setSessions] = useState<Session[]>([]);
 
-  
   useEffect(() => {
-    const fetchSessions = async () => {
-      const sessions = await apiService.fetchSessions();
-      setSessions(sessions);
-    };
-
     fetchSessions();
   }, []);
   // console.log('sessions :',sessions)
@@ -367,10 +363,10 @@ export default function DashboardPage() {
                 {selectedModel === "rag" ? "Key Information" : "Capabilities"}
               </Button>
             </div>
-            
+
             {/* Chat history */}
             <div className="mt-4 space-y-2">
-              <h2 className="text-sm font-semibold px-2">My Sessions</h2>
+              <h2 className="text-sm font-semibold px-2">Chat History</h2>
               <div className="space-y-1 max-h-60 overflow-y-auto pr-1">
                 {sessions.map((session) => (
                   <Button
@@ -380,6 +376,7 @@ export default function DashboardPage() {
                       session._id === currentSessionId ? "bg-muted" : ""
                     }`}
                     onClick={() => handleSessionClick(session._id)}
+                    title={session.title || "Untitled Session"} 
                   >
                     <MessageSquarePlus className="mr-2 h-4 w-4" />
                     {session.title || "Untitled Session"}

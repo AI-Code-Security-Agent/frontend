@@ -92,7 +92,6 @@ class UnifiedApiService {
         }));
         throw new Error(errorData.detail || "LLM chat failed");
       }
-
       return await response.json();
     } catch (error) {
       if (error instanceof Error) {
@@ -185,7 +184,6 @@ class UnifiedApiService {
       }
 
       const data = await response.json();
-      console.log('sessions : ', data);
       return data;
     } catch (error) {
       console.error("Error fetching session messages:", error);
@@ -199,7 +197,6 @@ class UnifiedApiService {
         method: "GET",
       });
 
-      console.log('url:', `${this.llmBaseUrl}${API_CONFIG.COMMON.ENDPOINTS.SESSIONS}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch sessions: ${response.statusText}`);
       }
@@ -207,10 +204,10 @@ class UnifiedApiService {
       return await response.json();
     } catch (error) {
       console.error("Error fetching sessions:", error);
-      throw new Error("Failed to connect to LLM API");
+      throw new Error("Failed to fetching sessions");
     }
   }
-
+  
   // updated LLM healthcheck function
   async llmHealthCheck(): Promise<{
     message: string;

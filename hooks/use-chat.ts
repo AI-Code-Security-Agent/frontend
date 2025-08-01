@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { ChatMessage } from "@/lib/types";
+import { ChatMessage, Session } from "@/lib/types";
 import { apiService } from "@/lib/api";
 import { ModelType } from "@/config/api";
 import Cookies from "js-cookie";
@@ -13,6 +13,8 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+const [sessions, setSessions] = useState<Session[]>([]);
+
 
   const clearError = useCallback(() => {
     setError(null);
@@ -76,6 +78,8 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
           Cookies.set("sessionId", response.sessionId, { expires: 1 });
         }
 
+
+
         // console.log("content:", response);
 
         const assistantMessage: ChatMessage = {
@@ -93,6 +97,13 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
             msg.id === loadingMessage.id ? assistantMessage : msg
           )
         );
+
+        fetchSessions(); // Refresh sessions after sending a message
+
+        // Clear loading message
+        setMessages((prev) =>
+          prev.filter((msg) => msg.id !== loadingMessage.id)
+        );
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "An unexpected error occurred";
@@ -109,6 +120,11 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
     },
     [currentSessionId, options]
   );
+
+  const fetchSessions = async () => {
+    const sessions = await apiService.fetchSessions();
+    setSessions(sessions);
+  };
 
   const loadSessionMessages = useCallback(async (sessionId: string) => {
     try {
@@ -147,5 +163,8 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
     clearError,
     currentSessionId,
     loadSessionMessages,
+    fetchSessions,
+    sessions,
+    setSessions,
   };
 }
