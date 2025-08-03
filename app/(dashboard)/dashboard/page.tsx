@@ -83,6 +83,22 @@ export default function DashboardPage() {
     loadSessionMessages(sessionId);
   };
 
+  const handleDeleteSession = (sessionId: string) => {
+    const confirmed = confirm("Are you sure you want to delete this session?");
+    if (confirmed) {
+      // apiService.deleteSession(sessionId)
+      //   .then(() => {
+      //     toast.success("Session deleted successfully");
+      //     setSessions((prev) => prev.filter((s) => s.id !== sessionId));
+      //     clearChat();
+      //   })
+      //   .catch((error) => {
+      //     toast.error("Failed to delete session");
+      //     console.error("Delete session error:", error);
+      //   });
+    }
+  };
+
   // Settings state
   const [ragSettings, setRagSettings] = useState({
     k: 5,
@@ -367,20 +383,60 @@ export default function DashboardPage() {
             {/* Chat history */}
             <div className="mt-4 space-y-2">
               <h2 className="text-sm font-semibold px-2">Chat History</h2>
-              <div className="space-y-1 max-h-60 overflow-y-auto pr-1">
-                {sessions.map((session) => (
-                  <Button
+              <div className="space-y-1 max-h-[350px] overflow-y-auto pr-1 scrollbar-hide relative">
+                {/* {sessions.map((session) => (
+                  <div
                     key={session._id}
-                    variant="ghost"
-                    className={`w-full justify-start text-xs truncate ${
-                      session._id === currentSessionId ? "bg-muted" : ""
-                    }`}
-                    onClick={() => handleSessionClick(session._id)}
-                    title={session.title || "Untitled Session"} 
+                    className="group flex items-center justify-between w-full"
                   >
-                    <MessageSquarePlus className="mr-2 h-4 w-4" />
-                    {session.title || "Untitled Session"}
-                  </Button>
+                    <Button
+                      variant="ghost"
+                      className={`flex-1 justify-start text-xs truncate ${
+                        session._id === currentSessionId ? "bg-muted" : ""
+                      }`}
+                      onClick={() => handleSessionClick(session._id)}
+                      title={session.title || "Untitled Session"}
+                    >
+                      <MessageSquarePlus className="mr-2 h-4 w-4" />
+                      {session.title || "Untitled Session"}
+                    </Button>
+
+
+                    <button
+                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-red-500 hover:text-red-700"
+                      onClick={() => handleDeleteSession(session._id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))} */}
+
+                {sessions.map((session) => (
+                  <div
+                    key={session._id}
+                    className="group relative flex items-center w-full"
+                  >
+                    <Button
+                      variant="ghost"
+                      className={`flex-1 justify-start text-xs truncate pr-8 ${
+                        session._id === currentSessionId ? "bg-muted" : ""
+                      }`}
+                      onClick={() => handleSessionClick(session._id)}
+                      title={session.title || "Untitled Session"}
+                    >
+                      <MessageSquarePlus className="mr-2 h-4 w-4" />
+                      {session.title || "Untitled Session"}
+                    </Button>
+
+                    {/* Delete icon shown only on hover */}
+                    <button
+                      onClick={() => handleDeleteSession(session._id)}
+                      className="absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-red-500 hover:text-red-700"
+                      title="Delete session"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 ))}
               </div>
             </div>
