@@ -33,11 +33,12 @@ export const API_CONFIG = {
       
     },
   },
-  COMMON:{
+  COMMON_API:{
     BASE_URL: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:4000',
     ENDPOINTS :{
       SESSIONS: '/chat/sessions',
       SESSIONS_CHATS: '/chat/sessions', //chat/sessions/:sessionId/messages
+      SESSION_DELETE: '/chat/delete_session' ///chat/delete_session/:sessionId
     }
   },
   TIMEOUT: 30000, // 30 seconds

@@ -173,7 +173,7 @@ class UnifiedApiService {
   async getSessionMessages(sessionId: string): Promise<ChatMessage[]> {
     try {
       const response = await fetchWithAuth(
-        `${this.llmBaseUrl}${API_CONFIG.COMMON.ENDPOINTS.SESSIONS_CHATS}/${sessionId}/messages`,
+        `${this.llmBaseUrl}${API_CONFIG.COMMON_API.ENDPOINTS.SESSIONS_CHATS}/${sessionId}/messages`,
         {
           method: "GET",
         }
@@ -193,7 +193,7 @@ class UnifiedApiService {
 
   async fetchSessions(): Promise<Session[]> {
     try {
-      const response = await fetchWithAuth(`${this.llmBaseUrl}${API_CONFIG.COMMON.ENDPOINTS.SESSIONS}`, {
+      const response = await fetchWithAuth(`${this.llmBaseUrl}${API_CONFIG.COMMON_API.ENDPOINTS.SESSIONS}`, {
         method: "GET",
       });
 
@@ -207,6 +207,29 @@ class UnifiedApiService {
       throw new Error("Failed to fetching sessions");
     }
   }
+
+  async deleteSession(sessionId: string): Promise<{ isSuccess: boolean; message: string }> {
+  try {
+    const response = await fetchWithAuth(
+      `${baseURL}${API_CONFIG.COMMON_API.ENDPOINTS.SESSION_DELETE}/${sessionId}`,
+      {
+        method: "POST",
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "Failed to delete session");
+    }
+
+    return result;
+  } catch (error: any) {
+    console.error("Error deleting sessions:", error);
+    throw new Error(error.message || "Failed to delete session");
+  }
+}
+
   
   // updated LLM healthcheck function
   async llmHealthCheck(): Promise<{

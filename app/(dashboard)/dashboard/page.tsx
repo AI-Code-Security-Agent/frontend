@@ -9,6 +9,7 @@ import { ChatMessage } from "@/components/chat-message";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ModelSettings } from "@/components/model-settings";
+import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 import {
   Bot,
   LogOut,
@@ -68,7 +69,6 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchSessions();
   }, []);
-  // console.log('sessions :',sessions)
 
   useEffect(() => {
     const cookieSessionId = Cookies.get("sessionId");
@@ -83,19 +83,24 @@ export default function DashboardPage() {
     loadSessionMessages(sessionId);
   };
 
-  const handleDeleteSession = (sessionId: string) => {
-    const confirmed = confirm("Are you sure you want to delete this session?");
-    if (confirmed) {
-      // apiService.deleteSession(sessionId)
-      //   .then(() => {
-      //     toast.success("Session deleted successfully");
-      //     setSessions((prev) => prev.filter((s) => s.id !== sessionId));
-      //     clearChat();
-      //   })
-      //   .catch((error) => {
-      //     toast.error("Failed to delete session");
-      //     console.error("Delete session error:", error);
-      //   });
+  // Handle delete session
+  const handleDeleteSession = async (sessionId: string) => {
+    try {
+      const result = await apiService.deleteSession(sessionId);
+
+      if (result.isSuccess) {
+        if (sessionId === currentSessionId) {
+          clearChat();
+        }
+
+        toast.success(result.message || "Session deleted successfully");
+        setSessions((prev) => prev.filter((s) => s._id !== sessionId));
+      } else {
+        toast.error(result.message || "Failed to delete session");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete session");
+      console.error("Delete session error:", error);
     }
   };
 
@@ -384,33 +389,6 @@ export default function DashboardPage() {
             <div className="mt-4 space-y-2">
               <h2 className="text-sm font-semibold px-2">Chat History</h2>
               <div className="space-y-1 max-h-[350px] overflow-y-auto pr-1 scrollbar-hide relative">
-                {/* {sessions.map((session) => (
-                  <div
-                    key={session._id}
-                    className="group flex items-center justify-between w-full"
-                  >
-                    <Button
-                      variant="ghost"
-                      className={`flex-1 justify-start text-xs truncate ${
-                        session._id === currentSessionId ? "bg-muted" : ""
-                      }`}
-                      onClick={() => handleSessionClick(session._id)}
-                      title={session.title || "Untitled Session"}
-                    >
-                      <MessageSquarePlus className="mr-2 h-4 w-4" />
-                      {session.title || "Untitled Session"}
-                    </Button>
-
-
-                    <button
-                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-red-500 hover:text-red-700"
-                      onClick={() => handleDeleteSession(session._id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))} */}
-
                 {sessions.map((session) => (
                   <div
                     key={session._id}
@@ -429,13 +407,18 @@ export default function DashboardPage() {
                     </Button>
 
                     {/* Delete icon shown only on hover */}
-                    <button
-                      onClick={() => handleDeleteSession(session._id)}
-                      className="absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-red-500 hover:text-red-700"
-                      title="Delete session"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <ConfirmDeleteDialog
+                      onConfirm={() => handleDeleteSession(session._id)}
+                      description="This will permanently delete the session and its chat history."
+                      trigger={
+                        <button
+                          className="absolute right-2 text-red-500 hover:text-red-700 hidden group-hover:inline"
+                          title="Delete session"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      }
+                    />
                   </div>
                 ))}
               </div>
