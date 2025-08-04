@@ -366,8 +366,13 @@ export function ChatMessage({ message }: ChatMessageProps) {
               {formatTimestamp(message.timestamp)}
             </span>
           </div>
-          <div className="bg-primary text-primary-foreground p-4 rounded-lg rounded-br-sm shadow-sm">
+          {/* <div className="bg-primary text-primary-foreground p-4 rounded-lg rounded-br-sm shadow-sm">
             <p className="text-sm whitespace-pre-wrap leading-relaxed">
+              {message.content}
+            </p>
+          </div> */}
+          <div className="bg-primary text-primary-foreground p-4 rounded-lg rounded-br-sm shadow-sm max-w-full">
+            <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
               {message.content}
             </p>
           </div>
