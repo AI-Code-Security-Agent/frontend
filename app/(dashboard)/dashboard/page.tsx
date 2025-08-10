@@ -229,7 +229,6 @@ export default function DashboardPage() {
         },
         credentials: "include",
       });
-
       const data = await response.json();
       if (data.isSuccess) {
         Cookies.remove("accessToken");
