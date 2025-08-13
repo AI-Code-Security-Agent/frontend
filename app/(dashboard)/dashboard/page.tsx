@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ModelSettings } from "@/components/model-settings";
 import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
+import { UserMenu } from "@/components/UserMenu";
 import {
   Bot,
   LogOut,
@@ -65,6 +66,8 @@ export default function DashboardPage() {
   const [showSettings, setShowSettings] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
+  const [userName, setUserName] = useState<string>("User");
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     fetchSessions();
@@ -76,6 +79,15 @@ export default function DashboardPage() {
       loadSessionMessages(cookieSessionId);
     }
   }, [loadSessionMessages, currentSessionId]);
+
+  // Handle client-side hydration for username
+  useEffect(() => {
+    setIsClient(true);
+    const cookieUserName = Cookies.get('userName');
+    if (cookieUserName) {
+      setUserName(cookieUserName);
+    }
+  }, []);
 
   // Handle session click
   const handleSessionClick = (sessionId: string) => {
@@ -213,8 +225,7 @@ export default function DashboardPage() {
     }
   };
 
-  const handleLogout = async (e: { preventDefault: () => void }) => {
-    e.preventDefault();
+  const handleLogout = async () => {
     const token = Cookies.get("accessToken");
     if (!token) {
       console.log("Access token not found.");
@@ -428,22 +439,18 @@ export default function DashboardPage() {
           {/* User Menu */}
           <div className="border-t p-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <User className="h-4 w-4" />
-                <span className="ml-2">User</span>
+              <div className="flex-1">
+                <UserMenu
+                  userName={userName}
+                  isClient={isClient}
+                  onLogout={handleLogout}
+                />
               </div>
-              <div className="flex items-center space-x-2">
-                {sidebarVisible && <ThemeToggle />}
-                <Button
-                  variant="ghost"
-                  title="Log Out"
-                  size="icon"
-                  onClick={handleLogout}
-                  className="cursor-pointer"
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
-              </div>
+              {sidebarVisible && (
+                <div className="ml-2">
+                  <ThemeToggle />
+                </div>
+              )}
             </div>
           </div>
         </div>
