@@ -168,6 +168,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Cookies from "js-cookie";
 import { toast } from "sonner";
 import { CosmicLayout } from "@/app/cosmic-layout";
+import { ProjectLogo } from "@/components/ui/ProjectLogo";
 
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -256,8 +257,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-background/95">
       <CosmicLayout>
         <div className="mx-auto w-full sm:w-[400px] space-y-6">
-          <div className="text-center space-y-2">
-            <Code className="h-8 w-8 mx-auto text-primary" />
+          <div className="text-center space-y-2 mt-20">
+            <ProjectLogo size="xl" clickable={true} className="mx-auto" />
             <h1 className="text-2xl font-semibold">
               Welcome back to CodeGuardian
             </h1>

@@ -10,6 +10,7 @@ import { Code, Mail, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { CosmicLayout } from "@/app/cosmic-layout";
+import { ProjectLogo } from "@/components/ui/ProjectLogo";
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export default function ForgotPasswordPage() {
@@ -51,8 +52,8 @@ export default function ForgotPasswordPage() {
       <CosmicLayout>
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[400px]">
         <div className="flex flex-col space-y-2 text-center">
-          <div className="flex items-center justify-center">
-            <Code className="h-8 w-8 text-primary" />
+          <div className="flex items-center justify-center mt-20">
+            <ProjectLogo size="xl" clickable={true} className="mx-auto" />
           </div>
           <h1 className="text-2xl font-semibold tracking-tight">
             CodeGuardian
