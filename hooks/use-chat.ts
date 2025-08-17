@@ -73,7 +73,7 @@ const [sessions, setSessions] = useState<Session[]>([]);
                 : m
             )
           );
-        } else {
+        } else if (modelType === "llm") {
           // STREAMING for LLM
           const session_id = currentSessionId || undefined;
 
@@ -111,7 +111,46 @@ const [sessions, setSessions] = useState<Session[]>([]);
               },
             }
           );
+        }else {
+          // STREAMING for Demo - LLM
+          console.log("Streaming for Demo - LLM");
+          const session_id = currentSessionId || undefined;
+
+          await apiService.sendDemoMessageStream(
+            content,
+            { session_id, max_tokens: settings.max_tokens, temperature: settings.temperature },
+            {
+              onToken: (token) => {
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === assistantId ? { ...m, content: (m.content || "") + token } : m
+                  )
+                );
+              },
+              onDone: (meta) => {
+                // update session id if provided
+                if (meta?.session_id) {
+                  setCurrentSessionId(meta.session_id);
+                  Cookies.set("sessionId", meta.session_id, { expires: 1 });
+                }
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === assistantId
+                      ? { ...m, isLoading: false, sessionId: meta?.session_id || session_id }
+                      : m
+                  )
+                );
+              },
+              onError: (errMsg) => {
+                setError(errMsg);
+                options.onError?.(errMsg);
+                // remove the streaming assistant bubble
+                setMessages((prev) => prev.filter((m) => m.id !== assistantId));
+              },
+            }
+          );
         }
+
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred";
         setError(errorMessage);

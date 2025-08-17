@@ -97,7 +97,7 @@ export function CreateDemoChatSession({
     setUserMessageCount(prev => prev + 1);
 
     const settings = mockRootProps.llmSettings;
-    await sendMessage(message, "llm", settings);
+    await sendMessage(message, "llm_demo", settings);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -124,7 +124,7 @@ export function CreateDemoChatSession({
     
     setUserMessageCount(prev => prev + 1);
     const settings = mockRootProps.llmSettings;
-    sendMessage(message, "llm", settings);
+    sendMessage(message, "llm_demo", settings);
   };
 
   return (

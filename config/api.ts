@@ -31,6 +31,7 @@ export const API_CONFIG = {
       CHAT: '/chat/messages_llm',
       HEALTH: '/chat/health_llm',
       CHAT_STREAM: '/chat/stream',
+      DEMO_CHAT_STREAM:'/chat/demo/stream'
       
     },
   },
@@ -44,5 +45,5 @@ export const API_CONFIG = {
   },
   TIMEOUT: 30000, // 30 seconds
 } as const;
- 
-export type ModelType = 'rag' | 'llm';
+
+export type ModelType = 'rag' | 'llm' | 'llm_demo';

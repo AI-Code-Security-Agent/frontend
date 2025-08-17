@@ -37,7 +37,7 @@ export interface ChatMessage {
   sources?: DocumentSource[];
   timestamp: Date;
   isLoading?: boolean;
-  modelType: 'rag' | 'llm';
+  modelType: 'rag' | 'llm' | 'llm_demo';
   sessionId?: string;
 }
 
