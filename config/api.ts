@@ -22,6 +22,7 @@ export const API_CONFIG = {
     BASE_URL: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:4000',
     ENDPOINTS: {
       QUERY: '/query',
+      QUERY_STREAM: '/chat/query/stream', 
       HEALTH: '/chat/health_rag',
     },
   },

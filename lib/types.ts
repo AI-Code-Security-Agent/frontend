@@ -2,6 +2,7 @@ export interface QueryRequest {
   question: string;
   k?: number;
   relevance_threshold?: number;
+  code_focused?: boolean;
 }
 
 export interface DocumentSource {

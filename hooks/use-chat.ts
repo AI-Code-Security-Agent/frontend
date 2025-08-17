@@ -60,19 +60,40 @@ const [sessions, setSessions] = useState<Session[]>([]);
 
       try {
         if (modelType === "rag") {
-          // keep existing non-stream path for RAG
-          const response = await apiService.sendMessage(content, "rag", {
-            k: settings.k,
+         await apiService.ragQueryStream(
+          {
+            question: content.trim(),
+            k: settings.k ?? 5,
             relevance_threshold: settings.relevance_threshold,
-          });
-          // finalize assistant
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantId
-                ? { ...m, isLoading: false, content: response.content, sources: response.sources }
-                : m
-            )
-          );
+            code_focused: true,
+          },
+          {
+            onMeta: (meta) => {
+              if (meta?.sources) {
+                setMessages((prev) =>
+                  prev.map((m) => (m.id === assistantId ? { ...m, sources: meta.sources } : m))
+                );
+              }
+            },
+            onToken: (tok) => {
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === assistantId ? { ...m, content: (m.content || "") + tok } : m
+                )
+              );
+            },
+            onDone: () => {
+              setMessages((prev) =>
+                prev.map((m) => (m.id === assistantId ? { ...m, isLoading: false } : m))
+              );
+            },
+            onError: (errMsg) => {
+              setError(errMsg);
+              options.onError?.(errMsg);
+              setMessages((prev) => prev.filter((m) => m.id !== assistantId));
+            },
+          }
+        );
         } else if (modelType === "llm") {
           // STREAMING for LLM
           const session_id = currentSessionId || undefined;

@@ -354,7 +354,7 @@ export default function DashboardPage() {
             <Separator className="my-4" />
 
             {/* Quick Actions */}
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <h2 className="text-sm font-semibold">Quick Actions</h2>
               <Button
                 variant="ghost"
@@ -394,7 +394,7 @@ export default function DashboardPage() {
                 <MessageSquarePlus className="mr-2 h-4 w-4" />
                 {selectedModel === "rag" ? "Key Information" : "Capabilities"}
               </Button>
-            </div>
+            </div> */}
 
             {/* Chat history */}
             <div className="mt-4 space-y-2">
