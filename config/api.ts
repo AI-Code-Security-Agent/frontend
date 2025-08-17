@@ -30,6 +30,7 @@ export const API_CONFIG = {
     ENDPOINTS: {
       CHAT: '/chat/messages_llm',
       HEALTH: '/chat/health_llm',
+      CHAT_STREAM: '/chat/stream',
       
     },
   },

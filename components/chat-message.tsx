@@ -202,13 +202,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         elements.push(
           <div
             key={elements.length}
-            className={`mt-4 mb-2 flex items-center space-x-2 ${
-              level === 1
+            className={`mt-4 mb-2 flex items-center space-x-2 ${level === 1
                 ? "text-xl font-bold"
                 : level === 2
-                ? "text-lg font-semibold"
-                : "text-base font-medium"
-            } text-gray-800 dark:text-gray-200`}
+                  ? "text-lg font-semibold"
+                  : "text-base font-medium"
+              } text-gray-800 dark:text-gray-200`}
           >
             <Hash className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             <span>{formatInlineElements(content)}</span>
@@ -409,74 +408,68 @@ export function ChatMessage({ message }: ChatMessageProps) {
           )}
         </div>
 
-        {message.isLoading ? (
-          <div className="bg-muted p-4 rounded-lg rounded-bl-sm shadow-sm">
-            <div className="flex items-center space-x-2">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span className="text-sm text-muted-foreground">
-                {isRAG
-                  ? "Searching knowledge base..."
-                  : "Generating response..."}
-              </span>
-            </div>
-          </div>
-        ) : (
-          <>
-            <div className="bg-muted/30 p-4 rounded-lg rounded-bl-sm shadow-sm border border-muted/40">
-              <div className="space-y-2">{formatContent(message.content)}</div>
-            </div>
-
-            {isRAG && message.sources && message.sources.length > 0 && (
-              <Card className="border-l-4 border-l-blue-500 shadow-sm">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-semibold flex items-center">
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Knowledge Sources ({message.sources.length})
-                    </h4>
-                    {message.sources.length > 3 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setShowAllSources(!showAllSources)}
-                        className="text-xs h-7"
-                      >
-                        {showAllSources ? "Show Less" : "Show All"}
-                      </Button>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-3">
-                    {(showAllSources
-                      ? message.sources
-                      : message.sources.slice(0, 3)
-                    ).map((source, index) => (
-                      <div
-                        key={index}
-                        className="border rounded-lg p-3 bg-background/80 hover:bg-background transition-colors"
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center space-x-2">
-                            <FileText className="h-3 w-3 text-primary" />
-                            <span className="text-xs font-medium text-primary truncate">
-                              {source.source}
-                            </span>
-                          </div>
-                          <Badge variant="secondary" className="text-xs">
-                            {(source.score * 100).toFixed(1)}% match
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
-                          {source.content}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+        <div className="bg-muted/30 p-4 rounded-lg rounded-bl-sm shadow-sm border border-muted/40">
+          <div className="flex items-center gap-2 mb-2">
+            {message.isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+            {message.isLoading && !isRAG && (
+              <span className="text-xs text-muted-foreground">Streaming response…</span>
             )}
-          </>
+            {message.isLoading && isRAG && (
+              <span className="text-xs text-muted-foreground">Searching knowledge base…</span>
+            )}
+          </div>
+          <div className="space-y-2">{formatContent(message.content || "")}</div>
+        </div>
+
+        {isRAG && message.sources && message.sources.length > 0 && (
+          <Card className="border-l-4 border-l-blue-500 shadow-sm">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-semibold flex items-center">
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Knowledge Sources ({message.sources.length})
+                </h4>
+                {message.sources.length > 3 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowAllSources(!showAllSources)}
+                    className="text-xs h-7"
+                  >
+                    {showAllSources ? "Show Less" : "Show All"}
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-3">
+                {(showAllSources
+                  ? message.sources
+                  : message.sources.slice(0, 3)
+                ).map((source, index) => (
+                  <div
+                    key={index}
+                    className="border rounded-lg p-3 bg-background/80 hover:bg-background transition-colors"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        <FileText className="h-3 w-3 text-primary" />
+                        <span className="text-xs font-medium text-primary truncate">
+                          {source.source}
+                        </span>
+                      </div>
+                      <Badge variant="secondary" className="text-xs">
+                        {(source.score * 100).toFixed(1)}% match
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
+                      {source.content}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>

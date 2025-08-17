@@ -148,6 +148,109 @@ class UnifiedApiService {
     }
   }
 
+  async llmChatStream(
+    request: LLMChatRequest,
+    handlers: {
+      onToken: (text: string) => void;
+      onDone?: (meta?: { session_id?: string; message_count?: number }) => void;
+      onError?: (err: string) => void;
+    }
+  ): Promise<void> {
+    try {
+      const url = `${this.llmBaseUrl}${API_CONFIG.LLM_API.ENDPOINTS.CHAT_STREAM}`;
+      const resp = await fetchWithAuth(url, {
+        method: "POST",
+        headers: {
+          // Important: accept SSE
+          Accept: "text/event-stream",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(request),
+      });
+
+      if (!resp.ok || !resp.body) {
+        const errText = await resp.text().catch(() => "");
+        throw new Error(errText || `HTTP ${resp.status}: ${resp.statusText}`);
+      }
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+
+      let buffer = "";
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        // Parse SSE frames separated by \n\n
+        const parts = buffer.split("\n\n");
+        buffer = parts.pop() || "";
+
+        for (const part of parts) {
+          const lines = part.split("\n");
+          let eventType = "message";
+          let dataLine = "";
+
+          for (const l of lines) {
+            if (l.startsWith("event:")) eventType = l.slice(6).trim();
+            if (l.startsWith("data:")) dataLine = l.slice(5).trim();
+          }
+
+          if (dataLine === "[DONE]") {
+            handlers.onDone?.();
+            return;
+          }
+
+          if (eventType === "token" && dataLine) {
+            try {
+              const payload = JSON.parse(dataLine);
+              if (payload.token) handlers.onToken(payload.token);
+            } catch {
+              // ignore malformed
+            }
+          } else if (eventType === "meta" && dataLine) {
+            try {
+              const payload = JSON.parse(dataLine);
+              handlers.onDone?.(payload);
+            } catch {
+              handlers.onDone?.();
+            }
+          } else if (eventType === "error" && dataLine) {
+            try {
+              const payload = JSON.parse(dataLine);
+              handlers.onError?.(payload.detail || "Stream error");
+            } catch {
+              handlers.onError?.("Stream error");
+            }
+          }
+        }
+      }
+      handlers.onDone?.();
+    } catch (e: any) {
+      handlers.onError?.(e?.message || "LLM stream failed");
+    }
+  }
+
+  async sendMessageStream(
+    message: string,
+    options: { session_id?: string; max_tokens?: number; temperature?: number },
+    handlers: {
+      onToken: (text: string) => void;
+      onDone?: (meta?: { session_id?: string; message_count?: number }) => void;
+      onError?: (err: string) => void;
+    }
+  ) {
+    return this.llmChatStream(
+      {
+        message,
+        session_id: options.session_id,
+        max_tokens: options.max_tokens,
+        temperature: options.temperature,
+      },
+      handlers
+    );
+  }
+
   // updated RAG healthcheck function
   async ragHealthCheck(): Promise<{ status: string }> {
     try {
