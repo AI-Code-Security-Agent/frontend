@@ -416,27 +416,111 @@ class UnifiedApiService {
     }
   }
 
-  async deleteSession(sessionId: string): Promise<{ isSuccess: boolean; message: string }> {
-  try {
-    const response = await fetchWithAuth(
-      `${baseURL}${API_CONFIG.COMMON_API.ENDPOINTS.SESSION_DELETE}/${sessionId}`,
-      {
-        method: "POST",
+   async deleteSession(sessionId: string): Promise<{ isSuccess: boolean; message: string }> {
+    try {
+      const response = await fetchWithAuth(
+        `${baseURL}${API_CONFIG.COMMON_API.ENDPOINTS.SESSION_DELETE}/${sessionId}`,
+        {
+          method: "POST",
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to delete session");
       }
-    );
 
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.message || "Failed to delete session");
+      return result;
+    } catch (error: any) {
+      console.error("Error deleting sessions:", error);
+      throw new Error(error.message || "Failed to delete session");
     }
-
-    return result;
-  } catch (error: any) {
-    console.error("Error deleting sessions:", error);
-    throw new Error(error.message || "Failed to delete session");
   }
+  
+  private async readSSE(
+    resp: Response,
+    handlers: {
+      onToken?: (t: string) => void;
+      onMeta?: (m: any) => void;
+      onDone?: () => void;
+      onError?: (e: string) => void;
+    }
+  ) {
+    if (!resp.ok || !resp.body) {
+      const errText = await resp.text().catch(() => "");
+      throw new Error(errText || `HTTP ${resp.status}: ${resp.statusText}`);
+    }
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      const parts = buffer.split("\n\n");
+      buffer = parts.pop() || "";
+
+      for (const part of parts) {
+        if (!part.trim()) continue;
+
+        const lines = part.split("\n");
+        let eventType = "message";
+        let dataLine = "";
+
+        for (const l of lines) {
+          if (l.startsWith("event:")) eventType = l.slice(6).trim();
+          if (l.startsWith("data:")) dataLine = l.slice(5).trim();
+        }
+
+        if (dataLine === "[DONE]") {
+          handlers.onDone?.();
+          return;
+        }
+
+        if (eventType === "token" && dataLine) {
+          try {
+            const p = JSON.parse(dataLine);
+            if (p.token) handlers.onToken?.(p.token);
+          } catch { /* ignore */ }
+        } else if (eventType === "meta" && dataLine) {
+          try {
+            handlers.onMeta?.(JSON.parse(dataLine));
+          } catch { /* ignore */ }
+        } else if (eventType === "error" && dataLine) {
+          try {
+            const p = JSON.parse(dataLine);
+            handlers.onError?.(p.detail || "Stream error");
+          } catch {
+            handlers.onError?.("Stream error");
+          }
+        }
+      }
+    }
+    handlers.onDone?.();
+  }
+
+  async ragQueryStream(
+    request: QueryRequest,
+    handlers: {
+      onToken: (text: string) => void;
+      onMeta?: (meta: { sources?: any[]; functions_found?: string[]; classes_found?: string[] }) => void;
+      onDone?: () => void;
+      onError?: (err: string) => void;
+    }
+  ): Promise<void> {
+    const url = `${this.ragBaseUrl}${API_CONFIG.RAG_API.ENDPOINTS.QUERY_STREAM}`;
+    const resp = await fetchWithAuth(url, {
+      method: "POST",
+      headers: { Accept: "text/event-stream", "Content-Type": "application/json" },
+      body: JSON.stringify(request),
+    });
+    await this.readSSE(resp, handlers);
+  
 }
+
 
   
   // updated LLM healthcheck function
