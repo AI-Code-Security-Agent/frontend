@@ -20,8 +20,7 @@ export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showUserForm, setShowUserForm] = useState(false);
   const [newUserDetails, setNewUserDetails] = useState<UserTypes>({
-    firstname: "",
-    lastname: "",
+    fullname: "",
     email: "",
     gitAccessToken: "",
   });
@@ -40,8 +39,7 @@ export default function SignUpPage() {
     e.preventDefault();
     setIsLoading(true);
     if (
-      !newUserDetails.firstname ||
-      !newUserDetails.lastname ||
+      !newUserDetails.fullname ||
       !newUserDetails.email
     ) {
       toast.warning("Please Fill all the fields.");
@@ -49,8 +47,7 @@ export default function SignUpPage() {
       return;
     }
     const payload = {
-      firstname: newUserDetails.firstname,
-      lastname: newUserDetails.lastname,
+      fullname: newUserDetails.fullname,
       email: newUserDetails.email,
       gitAccessToken: "not define",
     };
@@ -120,39 +117,23 @@ export default function SignUpPage() {
                   GitHub Connected Successfully
                 </div>
                 <div className="grid gap-2">
-                  <Label className="text-sm font-medium" htmlFor="FirstName">
-                    Enter First name
+                  <Label className="text-sm font-medium" htmlFor="FullName">
+                    Enter Full name
                   </Label>
                   <div className="relative">
                     <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                     <Input
-                      id="FirstName"
-                      name="FirstName"
+                      id="FullName"
+                      name="FullName"
                       type="text"
-                      placeholder="Enater Your First name"
+                      placeholder="Enter Your Full name"
                       className="pl-10"
-                      value={newUserDetails.firstname}
-                      onChange={(e) => setNewUserDetails({...newUserDetails,firstname:e.target.value})}
+                      value={newUserDetails.fullname}
+                      onChange={(e) => setNewUserDetails({...newUserDetails,fullname:e.target.value})}
                     />
                   </div>
                 </div>
-                <div className="grid gap-2">
-                  <Label className="text-sm font-medium" htmlFor="LastName">
-                    Enter Last name
-                  </Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                    <Input
-                      id="FirstName"
-                      name="FirstName"
-                      type="text"
-                      placeholder="Enater Your Last name"
-                      className="pl-10"
-                      value={newUserDetails.lastname}
-                      onChange={(e) => setNewUserDetails({...newUserDetails,lastname:e.target.value})}
-                    />
-                  </div>
-                </div>
+
                 <div className="grid gap-2">
                   <Label className="text-sm font-medium" htmlFor="email">
                     Enter E-mail
