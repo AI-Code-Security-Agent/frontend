@@ -30,9 +30,9 @@ export const API_CONFIG = {
     BASE_URL: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:4000',
     ENDPOINTS :{
       GETUSERDATA: '/profile/profile_data',
-      UPDATEPROFILE: '/profile/update',
+      UPDATEPERSONALDATA: '/profile/update_personal_data',
       DELETEPROFILE: '/profile/delete',
-      UPDATEPASS: '/profile/update_password'
+      UPDATEPASSWORD: '/profile/update_password'
     }
   },
   TIMEOUT: 30000, // 30 seconds

@@ -65,23 +65,12 @@ const handleGetPersonalInfo = async () => {
     setIsUpdatingProfile(true);
     try {
       // API call to update profile
-      const token = Cookies.get("accessToken");
-      const response = await fetch(`${baseURL}/api/profile`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
+     const result = await apiService.updatePersonalData(data);
+      if (!result.isSuccess) {
         throw new Error("Failed to update profile");
       }
-
-      const updatedUser = await response.json();
+      console.log("Profile update response:", result);
       setUser((prev) => (prev ? { ...prev, ...data } : null));
-
       // Update username cookie if changed
       const fullName = `${data.fullname}`;
       Cookies.set("userName", fullName, { expires: 1 });
@@ -97,21 +86,12 @@ const handleGetPersonalInfo = async () => {
     setIsUpdatingPassword(true);
     try {
       // API call to change password
-      const token = Cookies.get("accessToken");
-      const response = await fetch(`${baseURL}/api/profile/password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          newPassword: data.newPassword,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to change password");
+      const result = await apiService.updatePassword(data);
+      if (!result.isSuccess) {
+        throw new Error(result.message || "Failed to change password");
       }
+      console.log("Password change response:", result);
+      toast.success("Password changed successfully");
     } catch (error) {
       console.error("Error changing password:", error);
       throw error;

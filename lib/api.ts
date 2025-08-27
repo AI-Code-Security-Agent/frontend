@@ -596,6 +596,71 @@ class UnifiedApiService {
       };
     }
   }
+
+  async updatePersonalData(
+    data: PersonalInfoFormData
+  ): Promise<ApiResponse<PersonalInfoFormData>> {
+    try {
+      const response = await fetchWithAuth(
+        `${API_CONFIG.PROFILE_API.BASE_URL}${API_CONFIG.PROFILE_API.ENDPOINTS.UPDATEPERSONALDATA}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update personal data");
+      }
+
+      const result = await response.json();
+      console.log("Updated personal data:", result);
+      return result;
+    } catch (error) {
+      console.error("Error updating personal data:", error);
+
+      return {
+        isSuccess: false,
+        message: "Failed to update personal data",
+        content: null,
+      };
+    }
+  }
+
+  async updatePassword(
+    data: SecurityFormData
+  ): Promise<ApiResponse<SecurityFormData>> {
+    try {
+      const response = await fetchWithAuth(
+        `${API_CONFIG.PROFILE_API.BASE_URL}${API_CONFIG.PROFILE_API.ENDPOINTS.UPDATEPASSWORD}`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            newPassword: data.newPassword,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update password");
+      }
+
+      const result = await response.json();
+      console.log("Updated password:", result);
+      return result;
+    } catch (error) {
+      console.error("Error updating password:", error);
+
+      return {
+        isSuccess: false,
+        message: "Failed to update password",
+        content: null,
+      };
+    }
+  }
 }
 
 export const apiService = new UnifiedApiService();

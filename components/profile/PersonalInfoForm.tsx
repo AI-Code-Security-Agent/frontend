@@ -38,6 +38,7 @@ export function PersonalInfoForm({
 
   const handleSubmit = async (data: PersonalInfoFormData) => {
     try {
+      console.log("Submitting personal info:", data);
       await onSubmit(data);
       toast.success('Profile updated successfully');
     } catch (error) {
@@ -85,7 +86,7 @@ export function PersonalInfoForm({
               />
             </div>
 
-            <FormField
+            {/* <FormField
               control={form.control}
               name="email"
               rules={{
@@ -112,13 +113,26 @@ export function PersonalInfoForm({
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
+
+             <div>
+              <FormLabel className="flex items-center gap-2">
+                <Mail className="h-4 w-4" />
+                Email
+              </FormLabel>
+              <Input
+                type="email"
+                value={initialData.email}
+                disabled
+                readOnly
+              />
+            </div>
 
             <div className="flex gap-2 pt-4">
               <Button 
                 type="submit" 
                 disabled={isLoading || !form.formState.isValid}
-                className="flex items-center gap-2"
+                className="flex items-center text-black gap-2 hover:bg-green-500 hover:text-white"
               >
                 <Save className="h-4 w-4" />
                 {isLoading ? 'Saving...' : 'Save Changes'}

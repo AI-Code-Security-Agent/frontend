@@ -34,7 +34,6 @@ export function SecurityForm({ onSubmit, isLoading = false }: SecurityFormProps)
 
   const form = useForm<SecurityFormData>({
     defaultValues: {
-      currentPassword: '',
       newPassword: '',
       confirmPassword: '',
     },
@@ -71,42 +70,6 @@ export function SecurityForm({ onSubmit, isLoading = false }: SecurityFormProps)
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="currentPassword"
-              rules={{
-                required: 'Current password is required'
-              }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Current Password</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Input 
-                        type={showCurrentPassword ? 'text' : 'password'}
-                        placeholder="Enter your current password" 
-                        {...field} 
-                        disabled={isLoading}
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                      >
-                        {showCurrentPassword ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <FormField
               control={form.control}
@@ -195,8 +158,8 @@ export function SecurityForm({ onSubmit, isLoading = false }: SecurityFormProps)
             <div className="flex gap-2 pt-4">
               <Button 
                 type="submit" 
-                disabled={isLoading || !form.formState.isValid}
-                className="flex items-center gap-2"
+                disabled={isLoading}
+                className="flex items-center text-black gap-2 hover:bg-green-500 hover:text-white"
               >
                 <Save className="h-4 w-4" />
                 {isLoading ? 'Updating...' : 'Update Password'}
