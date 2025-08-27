@@ -5,10 +5,16 @@ import {
   LLMChatRequest,
   LLMChatResponse,
   ApiError,
-  Session
+  Session,
+  ApiResponse,
 } from "./types";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
-import { ChatMessage } from '@/lib/types';
+import { ChatMessage } from "@/lib/types";
+import {
+  UserProfile,
+  PersonalInfoFormData,
+  SecurityFormData,
+} from "@/lib/types";
 
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -79,13 +85,12 @@ class UnifiedApiService {
   // LLM API Methods
   async llmChat(request: LLMChatRequest): Promise<LLMChatResponse> {
     try {
-
       const url = `${this.llmBaseUrl}${API_CONFIG.LLM_API.ENDPOINTS.CHAT}`;
       const response = await fetchWithAuth(url, {
         method: "POST",
         body: JSON.stringify(request),
       });
-      
+
       if (!response.ok) {
         const errorData: ApiError = await response.json().catch(() => ({
           detail: `HTTP ${response.status}: ${response.statusText}`,
@@ -231,7 +236,7 @@ class UnifiedApiService {
     }
   }
 
-   async sendMessageStream(
+  async sendMessageStream(
     message: string,
     options: { session_id?: string; max_tokens?: number; temperature?: number },
     handlers: {
@@ -333,7 +338,7 @@ class UnifiedApiService {
       handlers.onError?.(e?.message || "LLM stream failed");
     }
   }
-   async sendDemoMessageStream(
+  async sendDemoMessageStream(
     message: string,
     options: { session_id?: string; max_tokens?: number; temperature?: number },
     handlers: {
@@ -354,16 +359,9 @@ class UnifiedApiService {
     );
   }
 
- 
-
   // updated RAG healthcheck function
   async ragHealthCheck(): Promise<{ status: string }> {
     try {
-      // const response = await fetch(
-      //   `${this.ragBaseUrl}${API_CONFIG.RAG_API.ENDPOINTS.HEALTH}`,
-      //   { method: "GET" }
-      // );
-
       const url = `${this.llmBaseUrl}${API_CONFIG.RAG_API.ENDPOINTS.HEALTH}`;
       const response = await fetchWithAuth(url, {
         method: "GET",
@@ -381,14 +379,16 @@ class UnifiedApiService {
   async getSessionMessages(sessionId: string): Promise<ChatMessage[]> {
     try {
       const response = await fetchWithAuth(
-        `${this.llmBaseUrl}${API_CONFIG.COMMON_API.ENDPOINTS.SESSIONS_CHATS}/${sessionId}/messages`,
+        `${this.llmBaseUrl}${API_CONFIG.SESSION_API.ENDPOINTS.SESSIONS_CHATS}/${sessionId}/messages`,
         {
           method: "GET",
         }
       );
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch session messages: ${response.statusText}`);
+        throw new Error(
+          `Failed to fetch session messages: ${response.statusText}`
+        );
       }
 
       const data = await response.json();
@@ -401,9 +401,12 @@ class UnifiedApiService {
 
   async fetchSessions(): Promise<Session[]> {
     try {
-      const response = await fetchWithAuth(`${this.llmBaseUrl}${API_CONFIG.COMMON_API.ENDPOINTS.SESSIONS}`, {
-        method: "GET",
-      });
+      const response = await fetchWithAuth(
+        `${this.llmBaseUrl}${API_CONFIG.SESSION_API.ENDPOINTS.SESSIONS}`,
+        {
+          method: "GET",
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Failed to fetch sessions: ${response.statusText}`);
@@ -416,10 +419,12 @@ class UnifiedApiService {
     }
   }
 
-   async deleteSession(sessionId: string): Promise<{ isSuccess: boolean; message: string }> {
+  async deleteSession(
+    sessionId: string
+  ): Promise<{ isSuccess: boolean; message: string }> {
     try {
       const response = await fetchWithAuth(
-        `${baseURL}${API_CONFIG.COMMON_API.ENDPOINTS.SESSION_DELETE}/${sessionId}`,
+        `${baseURL}${API_CONFIG.SESSION_API.ENDPOINTS.SESSION_DELETE}/${sessionId}`,
         {
           method: "POST",
         }
@@ -437,7 +442,7 @@ class UnifiedApiService {
       throw new Error(error.message || "Failed to delete session");
     }
   }
-  
+
   private async readSSE(
     resp: Response,
     handlers: {
@@ -484,11 +489,15 @@ class UnifiedApiService {
           try {
             const p = JSON.parse(dataLine);
             if (p.token) handlers.onToken?.(p.token);
-          } catch { /* ignore */ }
+          } catch {
+            /* ignore */
+          }
         } else if (eventType === "meta" && dataLine) {
           try {
             handlers.onMeta?.(JSON.parse(dataLine));
-          } catch { /* ignore */ }
+          } catch {
+            /* ignore */
+          }
         } else if (eventType === "error" && dataLine) {
           try {
             const p = JSON.parse(dataLine);
@@ -506,7 +515,11 @@ class UnifiedApiService {
     request: QueryRequest,
     handlers: {
       onToken: (text: string) => void;
-      onMeta?: (meta: { sources?: any[]; functions_found?: string[]; classes_found?: string[] }) => void;
+      onMeta?: (meta: {
+        sources?: any[];
+        functions_found?: string[];
+        classes_found?: string[];
+      }) => void;
       onDone?: () => void;
       onError?: (err: string) => void;
     }
@@ -514,15 +527,15 @@ class UnifiedApiService {
     const url = `${this.ragBaseUrl}${API_CONFIG.RAG_API.ENDPOINTS.QUERY_STREAM}`;
     const resp = await fetchWithAuth(url, {
       method: "POST",
-      headers: { Accept: "text/event-stream", "Content-Type": "application/json" },
+      headers: {
+        Accept: "text/event-stream",
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(request),
     });
     await this.readSSE(resp, handlers);
-  
-}
+  }
 
-
-  
   // updated LLM healthcheck function
   async llmHealthCheck(): Promise<{
     message: string;
@@ -556,6 +569,31 @@ class UnifiedApiService {
       return true;
     } catch {
       return false;
+    }
+  }
+
+  async getProfileData(): Promise<ApiResponse<UserProfile>> {
+    try {
+      const response = await fetchWithAuth(
+        `${API_CONFIG.PROFILE_API.BASE_URL}${API_CONFIG.PROFILE_API.ENDPOINTS.GETUSERDATA}`,
+        { method: "GET" }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch profile data");
+      }
+
+      const data = await response.json();
+      // console.log("Profile data:", data);
+      return data;
+    } catch (error) {
+      console.error("Error fetching profile data:", error);
+
+      return {
+        isSuccess: false,
+        message: "Failed to fetch profile data",
+        content: null,
+      };
     }
   }
 }

@@ -1,35 +1,19 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { ProfilePictureUpload } from '@/components/profile/ProfilePictureUpload';
-import { PersonalInfoForm } from '@/components/profile/PersonalInfoForm';
-import { SecurityForm } from '@/components/profile/SecurityForm';
-import { ArrowLeft } from 'lucide-react';
-import { toast } from 'sonner';
-import Cookies from 'js-cookie';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { ProfilePictureUpload } from "@/components/profile/ProfilePictureUpload";
+import { PersonalInfoForm } from "@/components/profile/PersonalInfoForm";
+import { SecurityForm } from "@/components/profile/SecurityForm";
+import { ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
+import Cookies from "js-cookie";
+import { mockRootProps } from "@/lib/profilePageMockData";
+import {UserProfile , PersonalInfoFormData, SecurityFormData} from "@/lib/types";
+import { apiService } from "@/lib/api";
 
-interface UserProfile {
-  _id: string;
-  firstname: string;
-  lastname: string;
-  email: string;
-  profilePicture?: string;
-}
-
-interface PersonalInfoFormData {
-  firstname: string;
-  lastname: string;
-  email: string;
-}
-
-interface SecurityFormData {
-  currentPassword: string;
-  newPassword: string;
-  confirmPassword: string;
-}
 
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -39,56 +23,70 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
-  const [selectedProfileImage, setSelectedProfileImage] = useState<File | null>(null);
+  const [selectedProfileImage, setSelectedProfileImage] = useState<File | null>(
+    null
+  );
 
-  useEffect(() => {
-    // Check if user is authenticated
-    const token = Cookies.get('accessToken');
-    if (!token) {
-      router.push('/login');
-      return;
+const handleGetPersonalInfo = async () => {
+  try {
+    const result = await apiService.getProfileData();
+
+    if (!result.isSuccess || !result.content) {
+      throw new Error("Failed to fetch personal information");
     }
 
-    // Load user data (mock data for now)
-    const mockUser: UserProfile = {
-      _id: "user123",
-      firstname: "John",
-      lastname: "Doe",
-      email: "john.doe@example.com",
-      profilePicture: "https://i.pravatar.cc/150?img=1"
-    };
-    
-    setUser(mockUser);
+    // console.log("Fetched user data:", result.content);
+    setUser(result.content);
+  } catch (error) {
+    console.error("Error fetching personal information:", error);
+    toast.error("Failed to fetch personal information");
+  } finally {
     setIsLoading(false);
-  }, [router]);
+  }
+};
+
+
+  useEffect(() => {
+    handleGetPersonalInfo();
+  }, []);
+
+  const getProfileImage = () => {
+    return user?.profilePicture || mockRootProps.user.profilePicture;
+  };
+
+  const getUserName = () => {
+    return (
+      user?.fullname ||
+      `${mockRootProps.user.firstname} ${mockRootProps.user.lastname}`
+    );
+  };
 
   const handlePersonalInfoSubmit = async (data: PersonalInfoFormData) => {
     setIsUpdatingProfile(true);
     try {
       // API call to update profile
-      const token = Cookies.get('accessToken');
+      const token = Cookies.get("accessToken");
       const response = await fetch(`${baseURL}/api/profile`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(data),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update profile');
+        throw new Error("Failed to update profile");
       }
 
       const updatedUser = await response.json();
-      setUser(prev => prev ? { ...prev, ...data } : null);
-      
+      setUser((prev) => (prev ? { ...prev, ...data } : null));
+
       // Update username cookie if changed
-      const fullName = `${data.firstname} ${data.lastname}`;
-      Cookies.set('userName', fullName, { expires: 1 });
-      
+      const fullName = `${data.fullname}`;
+      Cookies.set("userName", fullName, { expires: 1 });
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error("Error updating profile:", error);
       throw error;
     } finally {
       setIsUpdatingProfile(false);
@@ -99,25 +97,23 @@ export default function ProfilePage() {
     setIsUpdatingPassword(true);
     try {
       // API call to change password
-      const token = Cookies.get('accessToken');
+      const token = Cookies.get("accessToken");
       const response = await fetch(`${baseURL}/api/profile/password`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          currentPassword: data.currentPassword,
           newPassword: data.newPassword,
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to change password');
+        throw new Error("Failed to change password");
       }
-
     } catch (error) {
-      console.error('Error changing password:', error);
+      console.error("Error changing password:", error);
       throw error;
     } finally {
       setIsUpdatingPassword(false);
@@ -126,33 +122,34 @@ export default function ProfilePage() {
 
   const handleProfileImageChange = async (file: File | null) => {
     setSelectedProfileImage(file);
-    
+
     if (file) {
       try {
         // API call to upload profile picture
-        const token = Cookies.get('accessToken');
+        const token = Cookies.get("accessToken");
         const formData = new FormData();
-        formData.append('profilePicture', file);
+        formData.append("profilePicture", file);
 
         const response = await fetch(`${baseURL}/api/profile/picture`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
           body: formData,
         });
 
         if (!response.ok) {
-          throw new Error('Failed to upload profile picture');
+          throw new Error("Failed to upload profile picture");
         }
 
         const result = await response.json();
-        setUser(prev => prev ? { ...prev, profilePicture: result.profilePicture } : null);
-        toast.success('Profile picture updated successfully');
-        
+        setUser((prev) =>
+          prev ? { ...prev, profilePicture: result.profilePicture } : null
+        );
+        toast.success("Profile picture updated successfully");
       } catch (error) {
-        console.error('Error uploading profile picture:', error);
-        toast.error('Failed to upload profile picture');
+        console.error("Error uploading profile picture:", error);
+        toast.error("Failed to upload profile picture");
       }
     }
   };
@@ -173,7 +170,7 @@ export default function ProfilePage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <p>User not found</p>
-          <Button onClick={() => router.push('/dashboard')} className="mt-4">
+          <Button onClick={() => router.push("/dashboard")} className="mt-4">
             Back to Dashboard
           </Button>
         </div>
@@ -181,7 +178,7 @@ export default function ProfilePage() {
     );
   }
 
-  const fullName = `${user.firstname} ${user.lastname}`;
+  const fullName = `${user.fullname}`;
 
   return (
     <div className="min-h-screen bg-background">
@@ -191,14 +188,16 @@ export default function ProfilePage() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push("/dashboard")}
             className="h-10 w-10"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
             <h1 className="text-3xl font-bold">Profile Settings</h1>
-            <p className="text-muted-foreground">Manage your account settings and preferences</p>
+            <p className="text-muted-foreground">
+              Manage your account settings and preferences
+            </p>
           </div>
         </div>
 
@@ -206,10 +205,11 @@ export default function ProfilePage() {
           {/* Profile Picture Section */}
           <div className="text-center">
             <h2 className="text-xl font-semibold mb-6">Profile Picture</h2>
+
             <ProfilePictureUpload
-              currentImage={user.profilePicture}
+              currentImage={getProfileImage()}
               onImageChange={handleProfileImageChange}
-              userName={fullName}
+              userName={getUserName()}
             />
           </div>
 
@@ -218,8 +218,7 @@ export default function ProfilePage() {
           {/* Personal Information Form */}
           <PersonalInfoForm
             initialData={{
-              firstname: user.firstname,
-              lastname: user.lastname,
+              fullname: user.fullname,
               email: user.email,
             }}
             onSubmit={handlePersonalInfoSubmit}

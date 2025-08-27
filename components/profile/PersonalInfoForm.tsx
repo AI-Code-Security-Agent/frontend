@@ -17,8 +17,7 @@ import { User, Mail, Save } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface PersonalInfoFormData {
-  firstname: string;
-  lastname: string;
+  fullname: string;
   email: string;
 }
 
@@ -59,49 +58,24 @@ export function PersonalInfoForm({
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1  gap-4">
               <FormField
                 control={form.control}
-                name="firstname"
+                name="fullname"
                 rules={{
-                  required: 'First name is required',
+                  required: 'Full name is required',
                   minLength: {
                     value: 2,
-                    message: 'First name must be at least 2 characters'
+                    message: 'Full name must be at least 2 characters'
                   }
                 }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>First Name</FormLabel>
+                    <FormLabel>Full Name</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="Enter your first name" 
-                        {...field} 
-                        disabled={isLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="lastname"
-                rules={{
-                  required: 'Last name is required',
-                  minLength: {
-                    value: 2,
-                    message: 'Last name must be at least 2 characters'
-                  }
-                }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Last Name</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="Enter your last name" 
-                        {...field} 
+                      <Input
+                        placeholder="Enter your full name"
+                        {...field}
                         disabled={isLoading}
                       />
                     </FormControl>

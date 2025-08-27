@@ -59,3 +59,20 @@ export interface Session {
   title: string;
   createdAt: string;
 }
+
+export interface UserProfile {
+  _id: string;
+  fullname: string;
+  email: string;
+  profilePicture?: string;
+}
+
+export interface PersonalInfoFormData {
+  fullname: string;
+  email: string;
+}
+
+export interface SecurityFormData {
+  newPassword: string;
+  confirmPassword: string;
+}
