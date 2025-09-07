@@ -280,6 +280,8 @@ class UnifiedApiService {
         const errText = await resp.text().catch(() => "");
         throw new Error(errText || `HTTP ${resp.status}: ${resp.statusText}`);
       }
+      console.log("Response is ok, starting to read stream response...:" , resp.body);
+ 
 
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
@@ -347,7 +349,7 @@ class UnifiedApiService {
       onError?: (err: string) => void;
     }
   ) {
-    console.log("Sending Demo Message Stream in api:", message, options);
+    console.log("Sending Demo Message Stream in api.ts:", message, options);
     return this.llmDemoChatStream(
       {
         message,

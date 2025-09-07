@@ -412,7 +412,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
           <div className="flex items-center gap-2 mb-2">
             {message.isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
             {message.isLoading && !isRAG && (
-              <span className="text-xs text-muted-foreground">Streaming response…</span>
+              <span className="text-xs text-muted-foreground">Thinking....…</span>
             )}
             {message.isLoading && isRAG && (
               <span className="text-xs text-muted-foreground">Searching knowledge base…</span>
