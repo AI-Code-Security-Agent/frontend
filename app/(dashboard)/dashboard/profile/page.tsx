@@ -13,6 +13,7 @@ import Cookies from "js-cookie";
 import { mockRootProps } from "@/lib/profilePageMockData";
 import {UserProfile , PersonalInfoFormData, SecurityFormData} from "@/lib/types";
 import { apiService } from "@/lib/api";
+import { AnimatedBackground } from "@/components/animated-background";
 
 
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
@@ -137,6 +138,7 @@ const handleGetPersonalInfo = async () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
+        <AnimatedBackground />
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
           <p>Loading profile...</p>
@@ -148,6 +150,7 @@ const handleGetPersonalInfo = async () => {
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
+        <AnimatedBackground />
         <div className="text-center">
           <p>User not found</p>
           <Button onClick={() => router.push("/dashboard")} className="mt-4">
@@ -162,6 +165,7 @@ const handleGetPersonalInfo = async () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <AnimatedBackground />
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">

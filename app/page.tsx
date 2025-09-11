@@ -8,13 +8,18 @@ import { CosmicLayout } from "./cosmic-layout";
 import { ChatSessionDemo } from "@/components/ChatSessionDemo";
 import { useState } from "react";
 import { ProjectLogo } from "@/components/ui/ProjectLogo";
+import { AnimatedBackground } from "@/components/animated-background";
+
 
 export default function Home() {
   const [showChat, setShowChat] = useState(false);
 
   return (
     <div className="min-h-screen min-w-full bg-background relative overflow-hidden">
+      
       <CosmicLayout>
+ <AnimatedBackground />
+     
         {/* Content overlay */}
         <div className="relative z-10">
           <header className="fixed top-4 left-4 right-4 z-50 mx-auto max-w-6xl">

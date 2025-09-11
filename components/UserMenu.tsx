@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -18,10 +18,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { User, Settings, LogOut } from 'lucide-react';
-import { toast } from 'sonner';
-import Cookies from 'js-cookie';
+} from "@/components/ui/dialog";
+import { User, Settings, LogOut } from "lucide-react";
+import { toast } from "sonner";
+import Cookies from "js-cookie";
+import { mockRootProps } from "@/lib/profilePageMockData";
+import Image from "next/image";
 
 interface UserMenuProps {
   userName: string;
@@ -35,7 +37,7 @@ export function UserMenu({ userName, isClient, onLogout }: UserMenuProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleProfileClick = () => {
-    router.push('/dashboard/profile');
+    router.push("/dashboard/profile");
   };
 
   const handleLogoutConfirm = async () => {
@@ -44,21 +46,31 @@ export function UserMenu({ userName, isClient, onLogout }: UserMenuProps) {
       await onLogout();
       setIsLogoutDialogOpen(false);
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     } finally {
       setIsLoggingOut(false);
     }
   };
 
+  const getProfileImage = () => {
+    return mockRootProps.user.profilePicture;
+  };
+
   return (
     <div className="flex items-center justify-between">
-      <div className="flex items-center">
-        <User className="h-4 w-4" />
+      <div className="flex items-center cursor-pointer" onClick={() => router.push("/dashboard/profile")}>
+        <Image
+          src={getProfileImage()}
+          alt="Profile"
+          width={32}
+          height={32}
+          className="rounded-full"
+        />
         <span className="ml-2 text-sm font-medium">
-          {isClient ? userName : 'User'}
+          {isClient ? userName : "User"}
         </span>
       </div>
-      
+
       <Dialog open={isLogoutDialogOpen} onOpenChange={setIsLogoutDialogOpen}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -93,7 +105,8 @@ export function UserMenu({ userName, isClient, onLogout }: UserMenuProps) {
           <DialogHeader>
             <DialogTitle>Confirm Logout</DialogTitle>
             <DialogDescription>
-              Are you sure you want to logout? You will need to sign in again to access your account.
+              Are you sure you want to logout? You will need to sign in again to
+              access your account.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex gap-2">
@@ -109,7 +122,7 @@ export function UserMenu({ userName, isClient, onLogout }: UserMenuProps) {
               onClick={handleLogoutConfirm}
               disabled={isLoggingOut}
             >
-              {isLoggingOut ? 'Logging out...' : 'Yes, Logout'}
+              {isLoggingOut ? "Logging out..." : "Yes, Logout"}
             </Button>
           </DialogFooter>
         </DialogContent>

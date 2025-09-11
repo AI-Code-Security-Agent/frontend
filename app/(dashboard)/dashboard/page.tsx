@@ -40,6 +40,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Session } from "@/lib/types";
+import { AnimatedBackground } from "@/components/animated-background";
+
 
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -68,6 +70,8 @@ export default function DashboardPage() {
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const [userName, setUserName] = useState<string>("User");
   const [isClient, setIsClient] = useState(false);
+
+  
 
   useEffect(() => {
     fetchSessions();
@@ -270,6 +274,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex h-screen max-w-full bg-background">
+      <AnimatedBackground />
       {/* Sidebar */}
       <div
         className={`${
@@ -329,7 +334,7 @@ export default function DashboardPage() {
               <h2 className="text-sm font-semibold">Connection Status</h2>
               <div className="space-y-1">
                 <div
-                  className={`text-xs px-4 py-1 rounded flex items-center justify-between rounded-full ${
+                  className={`text-xs px-4 py-1 flex items-center justify-between rounded-full ${
                     ragConnected
                       ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
                       : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
@@ -339,7 +344,7 @@ export default function DashboardPage() {
                   <span>{ragConnected ? "🟢" : "🔴"}</span>
                 </div>
                 <div
-                  className={`text-xs px-4 py-1 rounded flex items-center justify-between rounded-full ${
+                  className={`text-xs px-4 py-1 flex items-center justify-between rounded-full ${
                     llmConnected
                       ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
                       : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
@@ -352,49 +357,6 @@ export default function DashboardPage() {
             </div>
 
             <Separator className="my-4" />
-
-            {/* Quick Actions */}
-            {/* <div className="space-y-2">
-              <h2 className="text-sm font-semibold">Quick Actions</h2>
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-sm"
-                onClick={() => {
-                  const message =
-                    selectedModel === "rag"
-                      ? "What topics can you help me with?"
-                      : "Hello! What can you help me with?";
-                  sendMessage(
-                    message,
-                    selectedModel,
-                    selectedModel === "rag" ? ragSettings : llmSettings
-                  );
-                }}
-                disabled={isLoading || !isCurrentModelConnected}
-              >
-                <MessageSquarePlus className="mr-2 h-4 w-4" />
-                {selectedModel === "rag" ? "Available Topics" : "Greeting"}
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-sm"
-                onClick={() => {
-                  const message =
-                    selectedModel === "rag"
-                      ? "Give me a summary of the most important information."
-                      : "Can you explain what you're capable of?";
-                  sendMessage(
-                    message,
-                    selectedModel,
-                    selectedModel === "rag" ? ragSettings : llmSettings
-                  );
-                }}
-                disabled={isLoading || !isCurrentModelConnected}
-              >
-                <MessageSquarePlus className="mr-2 h-4 w-4" />
-                {selectedModel === "rag" ? "Key Information" : "Capabilities"}
-              </Button>
-            </div> */}
 
             {/* Chat history */}
             <div className="mt-4 space-y-2">

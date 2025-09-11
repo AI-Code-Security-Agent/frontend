@@ -1,5 +1,11 @@
+import { AnimatedBackground } from "@/components/animated-background";
 import { CreateDemoChatSession } from "@/components/demo/CreateDemoChatSession";
 
 export default function DemoPage() {
-  return <CreateDemoChatSession />;
+  return (
+    <>
+      <AnimatedBackground />
+      <CreateDemoChatSession />
+    </>
+  );
 }

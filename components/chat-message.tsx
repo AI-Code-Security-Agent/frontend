@@ -14,6 +14,11 @@ import {
   FileText,
   List,
   Hash,
+  Download,
+  ThumbsDown,
+  ThumbsUp,
+  Edit,
+  Edit2,
 } from "lucide-react";
 import { ChatMessage as ChatMessageType } from "@/lib/types";
 import { useState, useCallback } from "react";
@@ -24,13 +29,11 @@ interface ChatMessageProps {
 }
 
 export function ChatMessage({ message }: ChatMessageProps) {
+  const [feedback, setFeedback] = useState<"like" | "dislike" | null>(null);
   const [showAllSources, setShowAllSources] = useState(false);
   const [copiedBlocks, setCopiedBlocks] = useState<Set<number>>(new Set());
   const isUser = message.role === "user";
   const isRAG = message.modelType === "rag";
-
-  // console.log("message", message);
-  // console.log("message content", message.content);
 
   const formatTimestamp = (date: Date) => {
     return new Intl.DateTimeFormat("en-US", {
@@ -38,6 +41,22 @@ export function ChatMessage({ message }: ChatMessageProps) {
       minute: "2-digit",
       hour12: true,
     }).format(date);
+  };
+
+  const handleCopyContent = () => {
+    navigator.clipboard.writeText(message.content);
+    toast.success("Content copied to clipboard!");
+  };
+
+  const handleDownloadContent = () => {
+    const element = document.createElement("a");
+    const file = new Blob([message.content], { type: "text/plain" });
+    element.href = URL.createObjectURL(file);
+    element.download = `response-${Date.now()}.txt`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+    toast.success("Content downloaded!");
   };
 
   const copyToClipboard = useCallback(
@@ -202,12 +221,13 @@ export function ChatMessage({ message }: ChatMessageProps) {
         elements.push(
           <div
             key={elements.length}
-            className={`mt-4 mb-2 flex items-center space-x-2 ${level === 1
+            className={`mt-4 mb-2 flex items-center space-x-2 ${
+              level === 1
                 ? "text-xl font-bold"
                 : level === 2
-                  ? "text-lg font-semibold"
-                  : "text-base font-medium"
-              } text-gray-800 dark:text-gray-200`}
+                ? "text-lg font-semibold"
+                : "text-base font-medium"
+            } text-gray-800 dark:text-gray-200`}
           >
             <Hash className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             <span>{formatInlineElements(content)}</span>
@@ -365,33 +385,44 @@ export function ChatMessage({ message }: ChatMessageProps) {
               {formatTimestamp(message.timestamp)}
             </span>
           </div>
-          {/* <div className="bg-primary text-primary-foreground p-4 rounded-lg rounded-br-sm shadow-sm">
-            <p className="text-sm whitespace-pre-wrap leading-relaxed">
-              {message.content}
-            </p>
-          </div> */}
-          <div className="bg-primary text-primary-foreground p-4 rounded-lg rounded-br-sm shadow-sm max-w-full">
-            <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
-              {message.content}
-            </p>
+          <div>
+            {/* User message bubble */}
+            <div className="bg-primary text-primary-foreground p-4 rounded-lg rounded-br-sm shadow-sm max-w-full">
+              <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
+                {message.content}
+              </p>
+            </div>
+
+            {/* Actions */}
+            {message.content && (
+              <div className="flex justify-end items-center gap-3 mt-0 pt-0 text-muted-foreground">
+                {/* Copy */}
+                <button
+                  title="Copy"
+                  onClick={handleCopyContent}
+                  className="p-2 rounded-full hover:bg-muted transition"
+                >
+                  <Copy className="h-4 w-4" />
+                </button>
+
+                {/* Edit */}
+                <button
+                  title="Edit"
+                  // onClick={handleEditMessage}
+                  className="p-2 rounded-full hover:bg-muted transition"
+                >
+                  <Edit2 className="h-4 w-4" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
-        {/* <Avatar className="h-10 w-10">
-          <AvatarFallback className="bg-primary text-primary-foreground">
-            <User className="h-5 w-5" />
-          </AvatarFallback>
-        </Avatar> */}
       </div>
     );
   }
 
   return (
     <div className="flex justify-start space-x-3 mb-6">
-      {/* <Avatar className="h-10 w-10">
-        <AvatarFallback className="bg-muted">
-          <Bot className="h-5 w-5" />
-        </AvatarFallback>
-      </Avatar> */}
       <div className="max-w-[85%] space-y-3">
         <div className="flex items-center space-x-2">
           <Badge variant="outline" className={modelColor}>
@@ -401,24 +432,88 @@ export function ChatMessage({ message }: ChatMessageProps) {
           <span className="text-xs text-muted-foreground">
             {formatTimestamp(message.timestamp)}
           </span>
-          {message.sessionId && (
+          {/* {message.sessionId && (
             <span className="text-xs text-muted-foreground">
               Session: {message.sessionId.slice(0, 8)}...
             </span>
-          )}
+          )} */}
         </div>
 
-        <div className="bg-muted/30 p-4 rounded-lg rounded-bl-sm shadow-sm border border-muted/40">
-          <div className="flex items-center gap-2 mb-2">
-            {message.isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-            {message.isLoading && !isRAG && (
-              <span className="text-xs text-muted-foreground">Thinking...</span>
-            )}
-            {message.isLoading && isRAG && (
-              <span className="text-xs text-muted-foreground">Searching knowledge base…</span>
-            )}
+        <div>
+          <div className="bg-muted/30 p-4 rounded-lg rounded-bl-sm shadow-sm border border-muted/40">
+            {/* Loader / Thinking State */}
+            <div className="flex items-center gap-2 mb-2">
+              {message.isLoading && (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              )}
+              {message.isLoading && !isRAG && (
+                <span className="text-xs text-muted-foreground">
+                  Thinking...
+                </span>
+              )}
+              {message.isLoading && isRAG && (
+                <span className="text-xs text-muted-foreground">
+                  Searching knowledge base…
+                </span>
+              )}
+            </div>
+            <div className="space-y-2">
+              {formatContent(message.content) || "No content"}
+            </div>
           </div>
-          <div className="space-y-2">{formatContent(message.content || "")}</div>
+          {/* Actions */}
+          {message.content && (
+            <div className="flex justify-end items-center gap-3 mt-0 pt-0 text-muted-foreground">
+              <button
+                title="Like"
+                onClick={() => setFeedback(feedback === "like" ? null : "like")}
+                className="p-2 rounded-full hover:bg-muted transition"
+              >
+                <ThumbsUp
+                  className={`h-4 w-4 ${
+                    feedback === "like"
+                      ? "text-white-600 fill-white"
+                      : "text-muted-foreground"
+                  }`}
+                />
+              </button>
+
+              {/* Dislike */}
+              <button
+                title="Dislike"
+                onClick={() =>
+                  setFeedback(feedback === "dislike" ? null : "dislike")
+                }
+                className="p-2 rounded-full hover:bg-muted transition"
+              >
+                <ThumbsDown
+                  className={`h-4 w-4 ${
+                    feedback === "dislike"
+                      ? "text-red-600 fill-red-600"
+                      : "text-muted-foreground"
+                  }`}
+                />
+              </button>
+
+              {/* Copy */}
+              <button
+                title="Copy"
+                onClick={handleCopyContent}
+                className="p-2 rounded-full hover:bg-muted transition"
+              >
+                <Copy className="h-4 w-4" />
+              </button>
+
+              {/* Download */}
+              <button
+                title="Download"
+                onClick={handleDownloadContent}
+                className="p-2 rounded-full hover:bg-muted transition"
+              >
+                <Download className="h-4 w-4" />
+              </button>
+            </div>
+          )}
         </div>
 
         {isRAG && message.sources && message.sources.length > 0 && (
