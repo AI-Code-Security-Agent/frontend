@@ -290,8 +290,8 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
   const clearChat = useCallback(() => {
     setMessages([]);
     setCurrentSessionId(null);
-    setError(null);
     Cookies.remove("sessionId");
+    setError(null);
   }, []);
 
   const sendMessage = useCallback(
@@ -363,12 +363,14 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
           )
         );
 
-        fetchSessions(); // Refresh sessions after sending a message
-
+        if (modelType !== "llm_demo") {
+          fetchSessions(); // Refresh sessions after sending a message
+        }
         // Clear loading message
         setMessages((prev) =>
           prev.filter((msg) => msg.id !== loadingMessage.id)
         );
+        
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "An unexpected error occurred";

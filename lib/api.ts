@@ -27,6 +27,7 @@ class UnifiedApiService {
     this.llmBaseUrl = API_CONFIG.LLM_API.BASE_URL;
   }
 
+  // Helper method for fetch with timeout
   private async fetchWithTimeout(
     url: string,
     options: RequestInit = {},
@@ -52,7 +53,8 @@ class UnifiedApiService {
     }
   }
 
-  // RAG API Methods
+  // Non-Streaming Methods
+
   async ragQuery(request: QueryRequest): Promise<QueryResponse> {
     try {
       const response = await this.fetchWithTimeout(
@@ -82,7 +84,6 @@ class UnifiedApiService {
     }
   }
 
-  // LLM API Methods
   async llmChat(request: LLMChatRequest): Promise<LLMChatResponse> {
     try {
       const url = `${this.llmBaseUrl}${API_CONFIG.LLM_API.ENDPOINTS.CHAT}`;
@@ -109,7 +110,36 @@ class UnifiedApiService {
     }
   }
 
-  // Unified method for both APIs
+  async llmChatDemo(request: LLMChatRequest): Promise<LLMChatResponse> {
+    try {
+      const url = `${this.llmBaseUrl}${API_CONFIG.LLM_API.ENDPOINTS.DEMO_CHAT}`;
+      const response = await fetchWithAuth(url, {
+        method: "POST",
+        body: JSON.stringify(request),
+      });
+
+      // console.log('url for LLM Demo Chat:', url);
+      // console.log("LLM Demo Chat response:", response);
+
+      if (!response.ok) {
+        const errorData: ApiError = await response.json().catch(() => ({
+          detail: `HTTP ${response.status}: ${response.statusText}`,
+        }));
+        throw new Error(errorData.detail || "LLM chat failed");
+      }
+      return await response.json();
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.name === "AbortError") {
+          throw new Error("LLM request timed out. Please try again.");
+        }
+        throw error;
+      }
+      throw new Error("An unexpected error occurred with LLM API");
+    }
+  }
+
+
   async sendMessage(
     message: string,
     modelType: ModelType,
@@ -138,8 +168,20 @@ class UnifiedApiService {
         content: response.answer,
         sources: response.sources,
       };
-    } else {
+    } else if (modelType === "llm") {
       const response = await this.llmChat({
+        message,
+        session_id: options.session_id,
+        max_tokens: options.max_tokens,
+        temperature: options.temperature,
+      });
+      return {
+        content: response.response,
+        sessionId: response.session_id,
+        messageCount: response.message_count,
+      };
+    } else {
+      const response = await this.llmChatDemo({
         message,
         session_id: options.session_id,
         max_tokens: options.max_tokens,
@@ -152,6 +194,10 @@ class UnifiedApiService {
       };
     }
   }
+
+
+
+  // Streaming Methods
 
   async llmChatStream(
     request: LLMChatRequest,
@@ -280,8 +326,10 @@ class UnifiedApiService {
         const errText = await resp.text().catch(() => "");
         throw new Error(errText || `HTTP ${resp.status}: ${resp.statusText}`);
       }
-      console.log("Response is ok, starting to read stream response...:" , resp.body);
- 
+      console.log(
+        "Response is ok, starting to read stream response...:",
+        resp.body
+      );
 
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
@@ -359,90 +407,6 @@ class UnifiedApiService {
       },
       handlers
     );
-  }
-
-  // updated RAG healthcheck function
-  async ragHealthCheck(): Promise<{ status: string }> {
-    try {
-      const url = `${this.llmBaseUrl}${API_CONFIG.RAG_API.ENDPOINTS.HEALTH}`;
-      const response = await fetchWithAuth(url, {
-        method: "GET",
-      });
-      if (!response.ok) {
-        throw new Error(`RAG health check failed: ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw new Error("Failed to connect to RAG API");
-    }
-  }
-
-  async getSessionMessages(sessionId: string): Promise<ChatMessage[]> {
-    try {
-      const response = await fetchWithAuth(
-        `${this.llmBaseUrl}${API_CONFIG.SESSION_API.ENDPOINTS.SESSIONS_CHATS}/${sessionId}/messages`,
-        {
-          method: "GET",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch session messages: ${response.statusText}`
-        );
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error fetching session messages:", error);
-      throw new Error("Failed to fetch session messages.");
-    }
-  }
-
-  async fetchSessions(): Promise<Session[]> {
-    try {
-      const response = await fetchWithAuth(
-        `${this.llmBaseUrl}${API_CONFIG.SESSION_API.ENDPOINTS.SESSIONS}`,
-        {
-          method: "GET",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch sessions: ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error("Error fetching sessions:", error);
-      throw new Error("Failed to fetching sessions");
-    }
-  }
-
-  async deleteSession(
-    sessionId: string
-  ): Promise<{ isSuccess: boolean; message: string }> {
-    try {
-      const response = await fetchWithAuth(
-        `${baseURL}${API_CONFIG.SESSION_API.ENDPOINTS.SESSION_DELETE}/${sessionId}`,
-        {
-          method: "POST",
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to delete session");
-      }
-
-      return result;
-    } catch (error: any) {
-      console.error("Error deleting sessions:", error);
-      throw new Error(error.message || "Failed to delete session");
-    }
   }
 
   private async readSSE(
@@ -538,7 +502,25 @@ class UnifiedApiService {
     await this.readSSE(resp, handlers);
   }
 
-  // updated LLM healthcheck function
+
+  // Health Check Methods
+
+  async ragHealthCheck(): Promise<{ status: string }> {
+    try {
+      const url = `${this.llmBaseUrl}${API_CONFIG.RAG_API.ENDPOINTS.HEALTH}`;
+      const response = await fetchWithAuth(url, {
+        method: "GET",
+      });
+      if (!response.ok) {
+        throw new Error(`RAG health check failed: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw new Error("Failed to connect to RAG API");
+    }
+  }
+
   async llmHealthCheck(): Promise<{
     message: string;
     model: string;
@@ -573,6 +555,77 @@ class UnifiedApiService {
       return false;
     }
   }
+
+ // Session API Methods
+
+  async getSessionMessages(sessionId: string): Promise<ChatMessage[]> {
+    try {
+      const response = await fetchWithAuth(
+        `${this.llmBaseUrl}${API_CONFIG.SESSION_API.ENDPOINTS.SESSIONS_CHATS}/${sessionId}/messages`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch session messages: ${response.statusText}`
+        );
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching session messages:", error);
+      throw new Error("Failed to fetch session messages.");
+    }
+  }
+
+  async fetchSessions(): Promise<Session[]> {
+    try {
+      const response = await fetchWithAuth(
+        `${this.llmBaseUrl}${API_CONFIG.SESSION_API.ENDPOINTS.SESSIONS}`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch sessions: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching sessions:", error);
+      throw new Error("Failed to fetching sessions");
+    }
+  }
+
+  async deleteSession(
+    sessionId: string
+  ): Promise<{ isSuccess: boolean; message: string }> {
+    try {
+      const response = await fetchWithAuth(
+        `${baseURL}${API_CONFIG.SESSION_API.ENDPOINTS.SESSION_DELETE}/${sessionId}`,
+        {
+          method: "POST",
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to delete session");
+      }
+
+      return result;
+    } catch (error: any) {
+      console.error("Error deleting sessions:", error);
+      throw new Error(error.message || "Failed to delete session");
+    }
+  }
+
+  // Profile API Methods
 
   async getProfileData(): Promise<ApiResponse<UserProfile>> {
     try {

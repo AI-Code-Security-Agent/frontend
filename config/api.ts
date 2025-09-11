@@ -14,7 +14,8 @@ export const API_CONFIG = {
       CHAT: '/chat/messages_llm',
       HEALTH: '/chat/health_llm',
       CHAT_STREAM: '/chat/stream',
-      DEMO_CHAT_STREAM:'/chat/demo/stream'
+      DEMO_CHAT_STREAM:'/chat/demo/stream',
+      DEMO_CHAT:'/chat/demo/messages_llm', // demo llm chat endpoint
       
     },
   },

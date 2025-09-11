@@ -10,10 +10,6 @@ export enum DemoMessageType {
   SYSTEM = "system"
 }
 
-// String formatters for demo chat functionality
-export const formatDemoMessageCount = (count: number, limit: number): string => {
-  return `${count}/${limit} messages`;
-};
 
 export const formatDemoLimitMessage = (limit: number): string => {
   return `You've reached the demo limit of ${limit} messages.`;
