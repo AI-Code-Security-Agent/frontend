@@ -50,7 +50,6 @@ export function SecurityForm({ onSubmit, isLoading = false }: SecurityFormProps)
 
     try {
       await onSubmit(data);
-      toast.success('Password changed successfully');
       form.reset();
     } catch (error) {
       toast.error('Failed to change password');

@@ -90,8 +90,8 @@ const handleGetPersonalInfo = async () => {
       if (!result.isSuccess) {
         throw new Error(result.message || "Failed to change password");
       }
-      console.log("Password change response:", result);
-      toast.success("Password changed successfully");
+      // console.log("Password change response:", result);
+      toast.success(result.message || "Password changed successfully");
     } catch (error) {
       console.error("Error changing password:", error);
       throw error;

@@ -704,7 +704,7 @@ class UnifiedApiService {
       }
 
       const result = await response.json();
-      console.log("Updated password:", result);
+      // console.log("Updated password:", result);
       return result;
     } catch (error) {
       console.error("Error updating password:", error);

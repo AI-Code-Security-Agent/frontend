@@ -63,7 +63,7 @@ export default function SignUpPage() {
 
     const result = await response.json();
     if(result.isSuccess) {
-      toast.success(result.message);
+      toast.success(result.message + " please check your email to get your password.");
       router.push("/login");
     }else {
       toast.error(result.message || "Failed to create User.")
@@ -168,7 +168,7 @@ export default function SignUpPage() {
               Already have an account?{" "}
               <Link
                 href="/login"
-                className="font-medium text-primary hover:underline"
+                className="font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:underline"
               >
                 Sign in
               </Link>

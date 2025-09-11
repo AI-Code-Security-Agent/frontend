@@ -325,13 +325,13 @@ export default function LoginPage() {
               <div className="flex justify-between w-full text-sm">
                 <span>
                   New to CodeGuardian?{" "}
-                  <Link href="/signup" className="text-primary hover:underline">
+                  <Link href="/signup" className="font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:underline">
                     Create account
                   </Link>
                 </span>
                 <Link
                   href="/forgot-password"
-                  className="text-primary hover:underline"
+                  className="font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:underline"
                 >
                   Forgot password?
                 </Link>
