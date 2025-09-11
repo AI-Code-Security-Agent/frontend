@@ -388,7 +388,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
           <div>
             {/* User message bubble */}
             <div className="bg-primary text-primary-foreground p-4 rounded-lg rounded-br-sm shadow-sm max-w-full">
-              <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
+              <p className="text-sm whitespace-pre-wrap break-words leading-relaxed ">
                 {message.content}
               </p>
             </div>
@@ -440,9 +440,10 @@ export function ChatMessage({ message }: ChatMessageProps) {
         </div>
 
         <div>
-          <div className="bg-muted/30 p-4 rounded-lg rounded-bl-sm shadow-sm border border-muted/40">
+          {/* <div className="bg-muted/30 p-4 rounded-lg rounded-bl-sm shadow-sm border border-muted/40"> */}
+          <div className="bg-muted p-4 rounded-lg rounded-bl-sm border border-muted/40  dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
             {/* Loader / Thinking State */}
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2 ">
               {message.isLoading && (
                 <Loader2 className="h-4 w-4 animate-spin" />
               )}
