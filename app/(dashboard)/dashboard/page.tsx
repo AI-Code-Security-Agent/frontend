@@ -26,6 +26,7 @@ import {
   ChevronDown,
   Database,
   Brain,
+  ShieldCheck,
 } from "lucide-react";
 import { useUnifiedChat } from "@/hooks/use-chat";
 import { apiService } from "@/lib/api";
@@ -315,6 +316,15 @@ export default function DashboardPage() {
             >
               <Settings className="mr-2 h-4 w-4" />
               Model Settings
+            </Button>
+
+            <Button
+              variant="outline"
+              className="w-full justify-start mb-3 rounded-full text-sm"
+              onClick={() => router.push('/dashboard/admin')}
+            >
+              <ShieldCheck className="mr-2 h-4 w-4" />
+              Admin Dashboard
             </Button>
 
             {showSettings && (
