@@ -16,6 +16,7 @@ export const API_CONFIG = {
       CHAT_STREAM: '/chat/stream',
       DEMO_CHAT_STREAM:'/chat/demo/stream',
       DEMO_CHAT:'/chat/demo/messages_llm', // demo llm chat endpoint
+      MESSAGE_FEEDBACK: '/chat/messages/feedback', // /chat/messages/feedback/:messageId
       
     },
   },

@@ -36,6 +36,9 @@ export function CreateDemoChatSession({
   redirectPath = mockRootProps.redirectPath,
   onLimitReached
 }: CreateDemoChatSessionProps) {
+
+
+  
   const router = useRouter();
   const {
     messages,

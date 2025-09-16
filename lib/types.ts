@@ -45,6 +45,7 @@ export interface ChatMessage {
   isLoading?: boolean;
   modelType: 'rag' | 'llm' | 'llm_demo';
   sessionId?: string;
+  feedback: 'like' | 'dislike' | null;
 }
 
 export interface ApiError {

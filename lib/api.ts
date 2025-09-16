@@ -9,7 +9,7 @@ import {
   ApiResponse,
 } from "./types";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
-import { ChatMessage ,GetSessionMessagesResponse} from "@/lib/types";
+import { ChatMessage, GetSessionMessagesResponse } from "@/lib/types";
 import {
   UserProfile,
   PersonalInfoFormData,
@@ -53,7 +53,7 @@ class UnifiedApiService {
     }
   }
 
-  // Non-Streaming Methods
+  // Non-Streaming Methods -Chat
 
   async ragQuery(request: QueryRequest): Promise<QueryResponse> {
     try {
@@ -139,7 +139,6 @@ class UnifiedApiService {
     }
   }
 
-
   async sendMessage(
     message: string,
     modelType: ModelType,
@@ -167,7 +166,6 @@ class UnifiedApiService {
       return {
         content: response.answer,
         sources: response.sources,
-
       };
     } else if (modelType === "llm") {
       const response = await this.llmChat({
@@ -196,7 +194,31 @@ class UnifiedApiService {
     }
   }
 
+  // Update chat feedback
+  async updateFeedback(
+    messageId: string,
+    newFeedback: "like" | "dislike" | null
+  ): Promise<any> {
+    try {
+      const response = await fetchWithAuth(
+        `${this.llmBaseUrl}${API_CONFIG.LLM_API.ENDPOINTS.MESSAGE_FEEDBACK}/${messageId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ feedback: newFeedback }),
+        }
+      );
 
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to update feedback");
+      }
+      return result;
+    } catch (error: any) {
+      console.error("Error updating feedback:", error);
+      throw new Error(error.message || "Failed to update feedback");
+    }
+  }
 
   // Streaming Methods
 
@@ -503,7 +525,6 @@ class UnifiedApiService {
     await this.readSSE(resp, handlers);
   }
 
-
   // Health Check Methods
 
   async ragHealthCheck(): Promise<{ status: string }> {
@@ -557,9 +578,11 @@ class UnifiedApiService {
     }
   }
 
- // Session API Methods
+  // Session API Methods
 
-  async getSessionMessages(sessionId: string): Promise<GetSessionMessagesResponse> {
+  async getSessionMessages(
+    sessionId: string
+  ): Promise<GetSessionMessagesResponse> {
     try {
       const response = await fetchWithAuth(
         `${this.llmBaseUrl}${API_CONFIG.SESSION_API.ENDPOINTS.SESSIONS_CHATS}/${sessionId}/messages`,
@@ -582,7 +605,9 @@ class UnifiedApiService {
     }
   }
 
-  async getDemoSessionMessages(sessionId: string): Promise<GetSessionMessagesResponse> {
+  async getDemoSessionMessages(
+    sessionId: string
+  ): Promise<GetSessionMessagesResponse> {
     try {
       const response = await fetch(
         `${this.llmBaseUrl}${API_CONFIG.SESSION_API.ENDPOINTS.SESSIONS_CHATS}/${sessionId}/messages/demo`,

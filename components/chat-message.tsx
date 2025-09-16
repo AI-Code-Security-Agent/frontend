@@ -24,12 +24,20 @@ import { ChatMessage as ChatMessageType } from "@/lib/types";
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
 import { Highlight } from "prism-react-renderer";
+import { apiService } from "@/lib/api";
 interface ChatMessageProps {
   message: ChatMessageType;
 }
 
 export function ChatMessage({ message }: ChatMessageProps) {
-  const [feedback, setFeedback] = useState<"like" | "dislike" | null>(null);
+  const [feedback, setFeedback] = useState<"like" | "dislike" | null>(
+    message.feedback ?? null
+  );
+
+  // console.log('message : ', message)
+  // console.log('feedback value of state :',feedback)
+  // console.log('initial feedback :', message.feedback)
+
   const [showAllSources, setShowAllSources] = useState(false);
   const [copiedBlocks, setCopiedBlocks] = useState<Set<number>>(new Set());
   const isUser = message.role === "user";
@@ -364,6 +372,19 @@ export function ChatMessage({ message }: ChatMessageProps) {
     });
   };
 
+  const handleFeedback = async (newFeedback: "like" | "dislike" | null) => {
+    const prev = feedback;
+    setFeedback(newFeedback);
+
+    try {
+      await apiService.updateFeedback(message.id, newFeedback);
+      console.log('Feedback is updated!')
+    } catch (err) {
+      console.error("Failed to update feedback:", err);
+      setFeedback(prev); 
+    }
+  };
+
   const ModelIcon = isRAG ? Database : Brain;
   const modelLabel = isRAG ? "RAG" : "LLM";
   const modelColor = isRAG
@@ -467,7 +488,9 @@ export function ChatMessage({ message }: ChatMessageProps) {
             <div className="flex justify-end items-center gap-3 mt-0 pt-0 text-muted-foreground">
               <button
                 title="Like"
-                onClick={() => setFeedback(feedback === "like" ? null : "like")}
+                onClick={() =>
+                  handleFeedback(feedback === "like" ? null : "like")
+                }
                 className="p-2 rounded-full hover:bg-muted transition"
               >
                 <ThumbsUp
@@ -483,7 +506,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
               <button
                 title="Dislike"
                 onClick={() =>
-                  setFeedback(feedback === "dislike" ? null : "dislike")
+                  handleFeedback(feedback === "dislike" ? null : "dislike")
                 }
                 className="p-2 rounded-full hover:bg-muted transition"
               >
