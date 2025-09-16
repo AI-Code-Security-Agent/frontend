@@ -28,6 +28,7 @@ export interface LLMChatResponse {
   response: string;
   session_id: string;
   message_count: number;
+  message_id:string;
 }
 
 export interface GetSessionMessagesResponse {

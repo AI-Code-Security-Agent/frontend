@@ -156,6 +156,7 @@ class UnifiedApiService {
     sources?: any[];
     sessionId?: string;
     messageCount?: number;
+    messageId?:string;
   }> {
     if (modelType === "rag") {
       const response = await this.ragQuery({
@@ -178,6 +179,7 @@ class UnifiedApiService {
         content: response.response,
         sessionId: response.session_id,
         messageCount: response.message_count,
+        messageId : response.message_id
       };
     } else {
       const response = await this.llmChatDemo({
@@ -190,6 +192,7 @@ class UnifiedApiService {
         content: response.response,
         sessionId: response.session_id,
         messageCount: response.message_count,
+        messageId : response.message_id
       };
     }
   }
@@ -210,9 +213,11 @@ class UnifiedApiService {
       );
 
       const result = await response.json();
+      // console.log('response :',result)
       if (!response.ok) {
         throw new Error(result.message || "Failed to update feedback");
       }
+      
       return result;
     } catch (error: any) {
       console.error("Error updating feedback:", error);

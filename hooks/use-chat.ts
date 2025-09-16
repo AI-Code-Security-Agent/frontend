@@ -91,10 +91,10 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
 
         setMessageCount(response.messageCount ?? 0);
 
-        // console.log("content:", response);
+        console.log("response:", response);
 
         const assistantMessage: ChatMessage = {
-          id: crypto.randomUUID(),
+          id: response.messageId || crypto.randomUUID(),
           role: "assistant",
           content: response.content,
           sources: response.sources,

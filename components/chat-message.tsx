@@ -24,7 +24,8 @@ import { ChatMessage as ChatMessageType } from "@/lib/types";
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
 import { Highlight } from "prism-react-renderer";
-import { apiService } from "@/lib/api";
+import {apiService } from "@/lib/api";
+
 interface ChatMessageProps {
   message: ChatMessageType;
 }
@@ -372,7 +373,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
     });
   };
 
-  const handleFeedback = async (newFeedback: "like" | "dislike" | null) => {
+ const handleFeedback = async (newFeedback: "like" | "dislike" | null) => {
     const prev = feedback;
     setFeedback(newFeedback);
 

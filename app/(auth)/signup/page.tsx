@@ -53,7 +53,7 @@ export default function SignUpPage() {
     };
 
    try {
-    const response = await fetch(`${baseURL}/users/createuser`,{
+    const response = await fetch(`${baseURL}/users/createuser?role=user`,{
       method:"POST",
       headers : {
         "Content-Type" : "application/json"
