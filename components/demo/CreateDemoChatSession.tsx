@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { mockRootProps } from "@/lib/demoMockData";
 import { ProjectLogo } from "../ui/ProjectLogo";
+import Cookies from "js-cookie";
 
 interface CreateDemoChatSessionProps {
   messageLimit?: number;
@@ -43,6 +44,9 @@ export function CreateDemoChatSession({
     isLoading,
     error,
     clearError,
+    loadSessionMessages,
+    currentSessionId,
+    messageCount
   } = useUnifiedChat();
 
   const [input, setInput] = useState("");
@@ -52,12 +56,27 @@ export function CreateDemoChatSession({
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  useEffect(() => {
+    const cookieSessionId = Cookies.get("demo_sessionId");
+    if (cookieSessionId ) {
+      loadSessionMessages(cookieSessionId , "demo");
+    }
+  }, [loadSessionMessages, currentSessionId]);
+
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
+
   }, [messages]);
+
+  useEffect(() => {
+  if (messageCount > userMessageCount) {
+    setUserMessageCount(messageCount);
+  }
+}, [messageCount]);
+
 
   // Focus textarea when not loading
   useEffect(() => {
@@ -90,7 +109,8 @@ export function CreateDemoChatSession({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading || isLimitReached) return;
+    if (!input.trim() ||
+     isLoading || isLimitReached) return;
 
     const message = input.trim();
     setInput("");

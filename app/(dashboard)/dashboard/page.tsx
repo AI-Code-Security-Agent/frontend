@@ -81,7 +81,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const cookieSessionId = Cookies.get("sessionId");
     if (cookieSessionId && !currentSessionId) {
-      loadSessionMessages(cookieSessionId);
+      loadSessionMessages(cookieSessionId ,"main");
     }
   }, [loadSessionMessages, currentSessionId]);
 
@@ -97,7 +97,7 @@ export default function DashboardPage() {
   // Handle session click
   const handleSessionClick = (sessionId: string) => {
     Cookies.set("sessionId", sessionId);
-    loadSessionMessages(sessionId);
+    loadSessionMessages(sessionId ,"main");
   };
 
   // Handle delete session

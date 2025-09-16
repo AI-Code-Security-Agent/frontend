@@ -23,7 +23,7 @@ export const API_CONFIG = {
     BASE_URL: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:4000',
     ENDPOINTS :{
       SESSIONS: '/chat/sessions',
-      SESSIONS_CHATS: '/chat/sessions', //chat/sessions/:sessionId/messages
+      SESSIONS_CHATS: '/chat/sessions', //chat/sessions/:sessionId/messages     || chat/sessions/:sessionId/messages/demo
       SESSION_DELETE: '/chat/delete_session' ///chat/delete_session/:sessionId
     }
   },

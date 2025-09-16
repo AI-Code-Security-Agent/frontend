@@ -30,6 +30,11 @@ export interface LLMChatResponse {
   message_count: number;
 }
 
+export interface GetSessionMessagesResponse {
+  session_messages: ChatMessage[];
+  totalMessages: number;
+}
+
 // Unified Message Type
 export interface ChatMessage {
   id: string;

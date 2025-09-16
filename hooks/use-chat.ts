@@ -271,6 +271,7 @@ import { ChatMessage, Session } from "@/lib/types";
 import { apiService } from "@/lib/api";
 import { ModelType } from "@/config/api";
 import Cookies from "js-cookie";
+import { set } from "date-fns";
 
 interface UseChatOptions {
   onError?: (error: string) => void;
@@ -282,6 +283,7 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
   const [error, setError] = useState<string | null>(null);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [messageCount, setMessageCount] = useState(0);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -330,11 +332,15 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
       setIsLoading(true);
       setError(null);
 
+     // console.log("current ses id:", currentSessionId);
+
       try {
         const response = await apiService.sendMessage(content, modelType, {
           ...settings,
           session_id:
-            modelType === "llm" ? currentSessionId || undefined : undefined,
+            modelType === "llm" || modelType === "llm_demo"
+              ? currentSessionId || undefined
+              : undefined,
         });
 
         // console.log("response for look session id:", response);
@@ -344,6 +350,13 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
           setCurrentSessionId(response.sessionId);
           Cookies.set("sessionId", response.sessionId, { expires: 1 });
         }
+
+        if (modelType === "llm_demo" && response.sessionId) {
+          setCurrentSessionId(response.sessionId);
+          Cookies.set("demo_sessionId", response.sessionId, { expires: 30 });
+        }
+
+        setMessageCount(response.messageCount ?? 0);
 
         // console.log("content:", response);
 
@@ -370,7 +383,6 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
         setMessages((prev) =>
           prev.filter((msg) => msg.id !== loadingMessage.id)
         );
-        
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "An unexpected error occurred";
@@ -393,31 +405,47 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
     setSessions(sessions);
   };
 
-  const loadSessionMessages = useCallback(async (sessionId: string) => {
-    try {
-      setIsLoading(true);
-      const response = await apiService.getSessionMessages(sessionId);
-      const loadedMessages: ChatMessage[] = response.map((msg: any) => ({
-        id: msg._id,
-        role: msg.role,
-        content: msg.content,
-        timestamp: new Date(msg.timestamp),
-        modelType: msg.model || "llm",
-        sessionId: msg.session,
-      }));
+  const loadSessionMessages = useCallback(
+    async (sessionId: string, mode: string) => {
+      try {
+        setIsLoading(true);
+        let response;
+        if (mode === "main") {
+          response = await apiService.getSessionMessages(sessionId);
+        } else {
+          response = await apiService.getDemoSessionMessages(sessionId);
+        }
 
-      setMessages(loadedMessages);
-      setCurrentSessionId(sessionId);
-      setError(null);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to load session messages";
-      setError(errorMessage);
-      options.onError?.(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+        // console.log("response for load session messages:", response);
+
+        const { session_messages, totalMessages } = response;
+
+        const loadedMessages: ChatMessage[] = session_messages.map((msg: any) => ({
+          id: msg._id,
+          role: msg.role,
+          content: msg.content,
+          timestamp: new Date(msg.timestamp),
+          modelType: msg.model || "llm",
+          sessionId: msg.session,
+        }));
+
+        setMessages(loadedMessages);
+        setCurrentSessionId(sessionId);
+        setMessageCount(totalMessages);
+        setError(null);
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Failed to load session messages";
+        setError(errorMessage);
+        options.onError?.(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
 
   // console.log("messages", messages);
 
@@ -433,5 +461,6 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
     fetchSessions,
     sessions,
     setSessions,
+    messageCount,
   };
 }

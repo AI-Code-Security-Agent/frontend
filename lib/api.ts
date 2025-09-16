@@ -9,7 +9,7 @@ import {
   ApiResponse,
 } from "./types";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
-import { ChatMessage } from "@/lib/types";
+import { ChatMessage ,GetSessionMessagesResponse} from "@/lib/types";
 import {
   UserProfile,
   PersonalInfoFormData,
@@ -167,6 +167,7 @@ class UnifiedApiService {
       return {
         content: response.answer,
         sources: response.sources,
+
       };
     } else if (modelType === "llm") {
       const response = await this.llmChat({
@@ -558,10 +559,33 @@ class UnifiedApiService {
 
  // Session API Methods
 
-  async getSessionMessages(sessionId: string): Promise<ChatMessage[]> {
+  async getSessionMessages(sessionId: string): Promise<GetSessionMessagesResponse> {
     try {
       const response = await fetchWithAuth(
         `${this.llmBaseUrl}${API_CONFIG.SESSION_API.ENDPOINTS.SESSIONS_CHATS}/${sessionId}/messages`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch session messages: ${response.statusText}`
+        );
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching session messages:", error);
+      throw new Error("Failed to fetch session messages.");
+    }
+  }
+
+  async getDemoSessionMessages(sessionId: string): Promise<GetSessionMessagesResponse> {
+    try {
+      const response = await fetch(
+        `${this.llmBaseUrl}${API_CONFIG.SESSION_API.ENDPOINTS.SESSIONS_CHATS}/${sessionId}/messages/demo`,
         {
           method: "GET",
         }

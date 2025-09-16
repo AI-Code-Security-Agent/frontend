@@ -17,7 +17,7 @@ export const formatDemoLimitMessage = (limit: number): string => {
 
 // Mock data for demo chat session
 export const mockRootProps = {
-  demoMessageLimit: 5,
+  demoMessageLimit: 10,
   redirectPath: "/login",
   llmSettings: {
     max_tokens: 1000,
