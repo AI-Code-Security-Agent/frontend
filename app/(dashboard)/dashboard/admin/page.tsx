@@ -6,7 +6,6 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
-import { adminMockData } from "@/lib/mock-data/adminMockData";
 import { Button } from "@/components/ui/button";
 import {
   Users,
@@ -51,6 +50,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { AnimatedBackground } from "@/components/animated-background";
+import { apiService } from "@/lib/api";
+import { AdminDashboardContent, AdminUser } from "@/types/types";
 
 // ✅ Validation schema
 const formSchema = z.object({
@@ -60,18 +61,37 @@ const formSchema = z.object({
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [dashboardData, setDashboardData] =
+    useState<AdminDashboardContent | null>(null);
+
+  const fetchDashboardData = async () => {
+    setIsLoading(true);
+    try {
+      const response = await apiService.getAdminDashboardData();
+      console.log("Admin Dashboard Data response in page:", response);
+      if (response.isSuccess && response.content) {
+        setDashboardData(response.content);
+      } else {
+        toast.error("Failed to fetch dashboard data.");
+      }
+    } catch (err) {
+      console.error("Error fetching dashboard data:", err);
+      toast.error("Something went wrong while fetching data");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     const token = Cookies.get("accessToken");
     if (!token) {
       router.push("/login");
+    } else {
+      fetchDashboardData();
     }
   }, [router]);
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
-  };
 
   // ✅ Form setup
   const form = useForm<z.infer<typeof formSchema>>({
@@ -83,9 +103,7 @@ export default function AdminDashboard() {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log("Creating admin:", values);
-    setIsLoading(true);
-
+    setIsCreating(true);
     try {
       const payload = {
         fullname: values.fullName,
@@ -101,29 +119,75 @@ export default function AdminDashboard() {
       });
 
       const result = await response.json();
-
       if (result.isSuccess) {
-        toast.success(
-          "Admin created successfully..!"
-        );
+        toast.success("Admin created successfully..!");
+        fetchDashboardData(); // refresh data
       } else {
-        toast.error( "Failed to create admin.");
+        toast.error("Failed to create admin.");
       }
     } catch (err) {
       toast.error("An error occurred while creating the admin.");
     } finally {
-      setIsLoading(false);
+      setIsCreating(false);
       form.reset();
     }
   };
+
+  // ✅ Loading state
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <AnimatedBackground />
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Loading System Data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ✅ No data
+  if (!dashboardData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <AnimatedBackground />
+        <div className="text-center">
+          <p>No dashboard data available.</p>
+          <Button onClick={() => router.push("/dashboard")} className="mt-4">
+            Back to main Dashboard
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const {
+    totalUsers,
+    totalAdmins,
+    totalChats,
+    totalSessions,
+    totalLikes,
+    totalDislikes,
+    totalUserChats,
+    totalAssistantChats,
+    totalDemoSessions,
+    adminData = [],
+  } = dashboardData;
+
+  const likePercentage =
+    totalLikes + totalDislikes > 0
+      ? ((totalLikes / (totalLikes + totalDislikes)) * 100).toFixed(1)
+      : "0";
 
   return (
     <div className="p-6 space-y-6">
       <AnimatedBackground />
 
       {/* Header with Back + Create Admin */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+        {/* Left section */}
+        <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="sm"
@@ -131,17 +195,17 @@ export default function AdminDashboard() {
             className="hover:bg-muted/50"
           >
             <ChevronLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
+            Back 
           </Button>
-          <div className="h-6 w-px bg-border mx-2" />
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary/50 to-primary bg-clip-text text-transparent">
+          <div className="hidden md:block h-6 w-px bg-border mx-2" />
+          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary/50 to-primary bg-clip-text text-transparent">
             System Analytics
           </h1>
         </div>
 
         <Dialog>
           <DialogTrigger asChild>
-            <Button className="bg-blue-500 text-white flex items-center gap-2 hover:bg-blue-600">
+            <Button className="bg-blue-500 text-white flex items-center gap-2 hover:bg-blue-600 w-full md:w-auto">
               <Plus className="h-4 w-4" />
               Create Admin
             </Button>
@@ -192,7 +256,7 @@ export default function AdminDashboard() {
                 />
 
                 <Button type="submit" className="w-full">
-                   {isLoading ? "Creating..." : "Create Admin"}
+                  {isLoading ? "Creating..." : "Create Admin"}
                 </Button>
               </form>
             </Form>
@@ -206,9 +270,9 @@ export default function AdminDashboard() {
             <Users className="h-4 w-4 text-blue-500" />
             <h3 className="text-sm font-medium">Total Users</h3>
           </div>
-          <p className="text-2xl font-bold mt-2">{adminMockData.totalUsers}</p>
+          <p className="text-2xl font-bold mt-2">{totalUsers}</p>
           <p className="text-xs text-muted-foreground mt-1">
-            {adminMockData.newUsersToday} new today
+            {totalUsers} users registered.
           </p>
         </Card>
 
@@ -217,32 +281,28 @@ export default function AdminDashboard() {
             <ShieldCheck className="h-4 w-4 text-green-500" />
             <h3 className="text-sm font-medium">Total Admins</h3>
           </div>
-          <p className="text-2xl font-bold mt-2">{adminMockData.totalAdmins}</p>
+          <p className="text-2xl font-bold mt-2">{totalAdmins}</p>
         </Card>
 
         <Card className="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
           <div className="flex items-center space-x-2">
             <Activity className="h-4 w-4 text-orange-500" />
-            <h3 className="text-sm font-medium">Active Sessions</h3>
+            <h3 className="text-sm font-medium">Chat Sessions</h3>
           </div>
-          <p className="text-2xl font-bold mt-2">
-            {adminMockData.sessionStats.active}
-          </p>
+          <p className="text-2xl font-bold mt-2">{totalSessions}</p>
           <p className="text-xs text-muted-foreground mt-1">
-            of {adminMockData.sessionStats.total} total sessions
+            {totalSessions} total chat sessions
           </p>
         </Card>
 
         <Card className="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
           <div className="flex items-center space-x-2">
-            <Clock className="h-4 w-4 text-purple-500" />
-            <h3 className="text-sm font-medium">Avg. Session Duration</h3>
+            <Activity className="h-4 w-4 text-orange-500" />
+            <h3 className="text-sm font-medium">Demo Chat Sessions</h3>
           </div>
-          <p className="text-2xl font-bold mt-2">
-            {adminMockData.sessionStats.averageDuration}
-          </p>
+          <p className="text-2xl font-bold mt-2">{totalDemoSessions}</p>
           <p className="text-xs text-muted-foreground mt-1">
-            Peak: {adminMockData.sessionStats.peakHours}
+            {totalDemoSessions} total demo sessions
           </p>
         </Card>
 
@@ -252,14 +312,35 @@ export default function AdminDashboard() {
             <MessageCircle className="h-4 w-4 text-blue-500" />
             <h3 className="text-sm font-medium">Total Messages</h3>
           </div>
-          <p className="text-2xl font-bold mt-2">
-            {adminMockData.messageStats.totalMessages}
+          <p className="text-2xl font-bold mt-2">{totalChats}</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {totalChats} total chats.
           </p>
-          <div className="flex justify-between text-xs text-muted-foreground mt-1">
-            <span>User: {adminMockData.messageStats.userMessages}</span>
-            <span>
-              Assistant: {adminMockData.messageStats.assistantMessages}
-            </span>
+        </Card>
+
+        <Card className="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
+          <div className="flex items-center space-x-2 mb-3">
+            <MessageCircle className="h-4 w-4 text-purple-500" />
+            <h3 className="text-sm font-medium">Message Breakdown</h3>
+          </div>
+
+          <div className="flex justify-between">
+            <div className="flex-1">
+              <p className="text-xl font-bold text-blue-600">
+                {totalUserChats}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                User Messages
+              </p>
+            </div>
+            <div className="flex-1 text-right">
+              <p className="text-xl font-bold text-purple-600">
+                {totalAssistantChats}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Assistant Messages
+              </p>
+            </div>
           </div>
         </Card>
 
@@ -268,12 +349,9 @@ export default function AdminDashboard() {
             <ThumbsUp className="h-4 w-4 text-green-500" />
             <h3 className="text-sm font-medium">Message Likes</h3>
           </div>
-          <p className="text-2xl font-bold mt-2">
-            {adminMockData.messageStats.feedbackStats.likes}
-          </p>
+          <p className="text-2xl font-bold mt-2">{totalLikes}</p>
           <p className="text-xs text-muted-foreground mt-1">
-            {adminMockData.messageStats.feedbackStats.likePercentage}%
-            satisfaction rate
+            {likePercentage}% satisfaction rate
           </p>
         </Card>
 
@@ -282,9 +360,7 @@ export default function AdminDashboard() {
             <ThumbsDown className="h-4 w-4 text-red-500" />
             <h3 className="text-sm font-medium">Message Unlikes</h3>
           </div>
-          <p className="text-2xl font-bold mt-2">
-            {adminMockData.messageStats.feedbackStats.unlikes}
-          </p>
+          <p className="text-2xl font-bold mt-2">{totalDislikes}</p>
         </Card>
       </div>
 
@@ -298,35 +374,27 @@ export default function AdminDashboard() {
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
-                <TableHead>Last Active</TableHead>
-                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {[...adminMockData.usersList, ...adminMockData.adminsList].map(
-                (user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>{user.name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
+              {adminData && adminData.length > 0 ? (
+                adminData.map((admin: AdminUser) => (
+                  <TableRow key={admin._id}>
+                    <TableCell>{admin.fullname}</TableCell>
+                    <TableCell>{admin.email}</TableCell>
                     <TableCell>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${
-                          user.role === "admin"
-                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                            : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                        }`}
-                      >
-                        {user.role}
+                      <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                        {admin.role}
                       </span>
                     </TableCell>
-                    <TableCell>{formatDate(user.lastActive)}</TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="sm">
-                        View Details
-                      </Button>
-                    </TableCell>
                   </TableRow>
-                )
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center">
+                    No admins found
+                  </TableCell>
+                </TableRow>
               )}
             </TableBody>
           </Table>

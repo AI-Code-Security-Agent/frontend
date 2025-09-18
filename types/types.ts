@@ -97,7 +97,8 @@ export interface SecurityFormData {
 
 // Dashboard Types
 export interface AdminUser {
-  fullName: string;
+  _id: string;
+  fullname: string;
   email: string;
   role: "admin";
 }
@@ -112,6 +113,6 @@ export interface AdminDashboardContent {
   totalDemoSessions: number;
   totalLikes: number;
   totalDislikes: number;
-  adminsData: AdminUser[];
+  adminData: AdminUser[];
 }
 

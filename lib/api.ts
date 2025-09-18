@@ -7,6 +7,8 @@ import {
   ApiError,
   Session,
   ApiResponse,
+  AdminUser,
+  AdminDashboardContent
 } from "../types/types";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { ChatMessage, GetSessionMessagesResponse } from "@/types/types";
@@ -15,6 +17,7 @@ import {
   PersonalInfoFormData,
   SecurityFormData,
 } from "@/types/types";
+import { promises } from "node:dns";
 
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -766,6 +769,32 @@ class UnifiedApiService {
       return {
         isSuccess: false,
         message: "Failed to update password",
+        content: null,
+      };
+    }
+  }
+
+  async getAdminDashboardData(): Promise<ApiResponse<AdminDashboardContent>> {
+    try {
+      const response = await fetchWithAuth(
+        `${this.llmBaseUrl}${API_CONFIG.ADDMIN_DASHBOARD_API.ENDPOINTS.DASHBOARDDATA}`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch dashboard data: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log("Admin Dashboard Data response in function:", data);
+      return data
+    } catch (err) {
+      console.error("Error fetching dashboard data:", err);
+      return {
+        isSuccess: false,
+        message: "Failed to fetch dashboard data",
         content: null,
       };
     }

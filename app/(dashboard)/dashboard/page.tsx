@@ -43,7 +43,6 @@ import {
 import { Session } from "@/types/types";
 import { AnimatedBackground } from "@/components/animated-background";
 
-
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export default function DashboardPage() {
@@ -72,7 +71,6 @@ export default function DashboardPage() {
   const [userName, setUserName] = useState<string>("User");
   const [isClient, setIsClient] = useState(false);
 
-  
 
   useEffect(() => {
     fetchSessions();
@@ -81,14 +79,14 @@ export default function DashboardPage() {
   useEffect(() => {
     const cookieSessionId = Cookies.get("sessionId");
     if (cookieSessionId && !currentSessionId) {
-      loadSessionMessages(cookieSessionId ,"main");
+      loadSessionMessages(cookieSessionId, "main");
     }
   }, [loadSessionMessages, currentSessionId]);
 
   // Handle client-side hydration for username
   useEffect(() => {
     setIsClient(true);
-    const cookieUserName = Cookies.get('userName');
+    const cookieUserName = Cookies.get("userName");
     if (cookieUserName) {
       setUserName(cookieUserName);
     }
@@ -97,7 +95,7 @@ export default function DashboardPage() {
   // Handle session click
   const handleSessionClick = (sessionId: string) => {
     Cookies.set("sessionId", sessionId);
-    loadSessionMessages(sessionId ,"main");
+    loadSessionMessages(sessionId, "main");
   };
 
   // Handle delete session
@@ -265,6 +263,7 @@ export default function DashboardPage() {
     setSidebarVisible(!sidebarVisible);
   };
 
+  console.log('side bar state: ', sidebarVisible)
   const isCurrentModelConnected =
     selectedModel === "rag" ? ragConnected : llmConnected;
 
@@ -276,11 +275,17 @@ export default function DashboardPage() {
   return (
     <div className="flex h-screen max-w-full bg-background">
       <AnimatedBackground />
-      {/* Sidebar */}
+      {sidebarVisible &&  (
+        <div
+          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          onClick={toggleSidebar} // close sidebar when clicking outside
+        />
+      )}
       <div
-        className={`${
-          sidebarVisible ? "w-64" : "w-0"
-        } border-r bg-muted/40 transition-all duration-300 ease-in-out overflow-hidden`}
+        className={`${sidebarVisible ? "w-64" : "w-0"} 
+              border-r bg-muted/90 dark:bg-gray-900/95 
+              transition-all duration-300 ease-in-out 
+              overflow-hidden fixed md:relative z-40 h-full`}
       >
         <div className="flex h-14 items-center justify-between border-b px-4">
           <div className="flex items-center">
@@ -321,7 +326,7 @@ export default function DashboardPage() {
             <Button
               variant="outline"
               className="w-full justify-start mb-3 rounded-full text-sm"
-              onClick={() => router.push('/dashboard/admin')}
+              onClick={() => router.push("/dashboard/admin")}
             >
               <ShieldCheck className="mr-2 h-4 w-4" />
               Admin Dashboard
@@ -432,7 +437,7 @@ export default function DashboardPage() {
       <div className="flex-1 flex flex-col w-full">
         {/* Header when sidebar is hidden */}
         {!sidebarVisible && (
-          <div className="flex items-center justify-between h-14 border-b px-4">
+          <div className="flex items-center justify-between h-14 border-b px-4 ">
             <div className="flex items-center">
               <Button
                 variant="ghost"
@@ -668,16 +673,14 @@ export default function DashboardPage() {
             </form>
 
             {/* Footer Info */}
-            <div className="flex justify-center items-center mt-3 text-xs text-muted-foreground">
-              <span className="flex items-center space-x-4">
-                <span>Press Enter to send, Shift+Enter for new line</span>
-                <span>•</span>
-                <span>{input.length}/1000</span>
-                <span>•</span>
-                <span className="flex items-center">
-                  <ModelIcon className="h-3 w-3 mr-1" />
-                  {modelDescription}
-                </span>
+            <div className="flex flex-wrap justify-center items-center mt-3 text-xs text-muted-foreground gap-2 text-center">
+              <span>Press Enter to send, Shift+Enter for new line</span>
+              <span>•</span>
+              <span>{input.length}/1000</span>
+              <span>•</span>
+              <span className="flex items-center justify-center">
+                <ModelIcon className="h-3 w-3 mr-1" />
+                {modelDescription}
               </span>
             </div>
           </div>
