@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
-import { adminMockData } from "@/lib/adminMockData";
+import { adminMockData } from "@/lib/mock-data/adminMockData";
 import { Button } from "@/components/ui/button";
 import {
   Users,
@@ -92,8 +92,6 @@ export default function AdminDashboard() {
         email: values.email,
       };
 
-      console.log("Payload:", payload);
-
       const response = await fetch(`${baseURL}/users/createuser?role=admin`, {
         method: "POST",
         headers: {
@@ -103,7 +101,6 @@ export default function AdminDashboard() {
       });
 
       const result = await response.json();
-      console.log("Response:", result);
 
       if (result.isSuccess) {
         toast.success(

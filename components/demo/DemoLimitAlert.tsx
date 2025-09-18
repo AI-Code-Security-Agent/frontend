@@ -3,7 +3,7 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
-import { formatDemoLimitMessage } from "@/lib/demoMockData";
+import { formatDemoLimitMessage } from "@/lib/mock-data/demoMockData";
 
 interface DemoLimitAlertProps {
   messageLimit: number;

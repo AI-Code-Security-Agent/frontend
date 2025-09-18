@@ -21,7 +21,7 @@ import { useUnifiedChat } from "@/hooks/use-chat";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
-import { mockRootProps } from "@/lib/demoMockData";
+import { mockRootProps } from "@/lib/mock-data/demoMockData";
 import { ProjectLogo } from "../ui/ProjectLogo";
 import Cookies from "js-cookie";
 

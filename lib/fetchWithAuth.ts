@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 export async function fetchWithAuth(
   url: string,
   options: RequestInit = {},
-  timeout = 30000 // default timeout 30 sec
+  timeout = 30000 
 ): Promise<Response> {
   const token = Cookies.get("accessToken");
 

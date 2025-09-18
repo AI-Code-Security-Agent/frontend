@@ -20,7 +20,7 @@ import {
   Edit,
   Edit2,
 } from "lucide-react";
-import { ChatMessage as ChatMessageType } from "@/lib/types";
+import { ChatMessage as ChatMessageType } from "@/types/types";
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
 import { Highlight } from "prism-react-renderer";

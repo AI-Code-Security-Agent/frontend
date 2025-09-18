@@ -22,7 +22,7 @@ import {
 import { User, Settings, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import Cookies from "js-cookie";
-import { mockRootProps } from "@/lib/profilePageMockData";
+import { mockRootProps } from "@/lib/mock-data/profilePageMockData";
 import Image from "next/image";
 
 interface UserMenuProps {

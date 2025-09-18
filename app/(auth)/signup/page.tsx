@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { Code, Mail, Lock, User, Github, Target } from "lucide-react";
-import { UserTypes } from "@/types/user";
+import { UserTypes } from "@/types/types";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { CosmicLayout } from "@/app/cosmic-layout";
@@ -26,14 +26,14 @@ export default function SignUpPage() {
   });
 
   // Temporary function to demonstrate the flow
-  const handleGithubSignIn = () => {
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setShowUserForm(true);
-      setIsLoading(false);
-    }, 1500);
-  };
+  // const handleGithubSignIn = () => {
+  //   setIsLoading(true);
+  //   // Simulate API call
+  //   setTimeout(() => {
+  //     setShowUserForm(true);
+  //     setIsLoading(false);
+  //   }, 1500);
+  // };
 
   const hndleCreateUser = async(e: React.FormEvent) => {
     e.preventDefault();
@@ -93,8 +93,8 @@ export default function SignUpPage() {
         </div>
 
         <Card className="border-2">
-          {!showUserForm ? (
-            <CardContent className="pt-6">
+          {/* {!showUserForm ? ( */}
+            {/* <CardContent className="pt-6">
               <Button
                 className="w-full font-medium flex items-center justify-center"
                 size="lg"
@@ -108,14 +108,14 @@ export default function SignUpPage() {
                 We need access to your GitHub account to analyze your
                 repositories
               </p>
-            </CardContent>
-          ) : (
+            </CardContent> */}
+          {/* ) : ( */}
             <form onSubmit={hndleCreateUser}>
               <CardContent className="grid gap-4 pt-6">
-                <div className="flex items-center justify-center text-sm text-green-600 mb-2">
+                {/* <div className="flex items-center justify-center text-sm text-green-600 mb-2">
                   <Github className="mr-2 h-5 w-5" />
                   GitHub Connected Successfully
-                </div>
+                </div> */}
                 <div className="grid gap-2">
                   <Label className="text-sm font-medium" htmlFor="FullName">
                     Enter Full name
@@ -162,7 +162,7 @@ export default function SignUpPage() {
                 </Button>
               </CardContent>
             </form>
-          )}
+          {/* )} */}
           <CardFooter className="flex flex-col space-y-4 border-t pt-6">
             <div className="text-sm text-muted-foreground text-center">
               Already have an account?{" "}

@@ -10,8 +10,8 @@ import { SecurityForm } from "@/components/profile/SecurityForm";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import Cookies from "js-cookie";
-import { mockRootProps } from "@/lib/profilePageMockData";
-import {UserProfile , PersonalInfoFormData, SecurityFormData} from "@/lib/types";
+import { mockRootProps } from "@/lib/mock-data/profilePageMockData";
+import {UserProfile , PersonalInfoFormData, SecurityFormData} from "@/types/types";
 import { apiService } from "@/lib/api";
 import { AnimatedBackground } from "@/components/animated-background";
 

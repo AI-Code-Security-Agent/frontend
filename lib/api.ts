@@ -7,14 +7,14 @@ import {
   ApiError,
   Session,
   ApiResponse,
-} from "./types";
+} from "../types/types";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
-import { ChatMessage, GetSessionMessagesResponse } from "@/lib/types";
+import { ChatMessage, GetSessionMessagesResponse } from "@/types/types";
 import {
   UserProfile,
   PersonalInfoFormData,
   SecurityFormData,
-} from "@/lib/types";
+} from "@/types/types";
 
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 

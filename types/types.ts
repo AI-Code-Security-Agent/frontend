@@ -1,3 +1,12 @@
+export interface UserTypes {
+  _id?: string;
+  fullname: string;
+  email: string;
+  password?: string;
+  gitAccessToken?: string;
+}
+
+
 export interface QueryRequest {
   question: string;
   k?: number;
@@ -16,7 +25,7 @@ export interface QueryResponse {
   sources: DocumentSource[];
 }
 
-// LLM API Types
+
 export interface LLMChatRequest {
   message: string;
   session_id?: string;
@@ -60,6 +69,7 @@ export interface ApiResponse<T> {
   content: T | null;
 }
 
+// Session Types
 export interface Session {
   _id: string;
   user: string;
@@ -67,6 +77,7 @@ export interface Session {
   createdAt: string;
 }
 
+// user profile and settings types
 export interface UserProfile {
   _id: string;
   fullname: string;
@@ -83,3 +94,24 @@ export interface SecurityFormData {
   newPassword: string;
   confirmPassword: string;
 }
+
+// Dashboard Types
+export interface AdminUser {
+  fullName: string;
+  email: string;
+  role: "admin";
+}
+
+export interface AdminDashboardContent {
+  totalUsers: number;
+  totalAdmins: number;
+  totalChats: number;
+  totalUserChats: number;
+  totalAssistantChats: number;
+  totalSessions: number;
+  totalDemoSessions: number;
+  totalLikes: number;
+  totalDislikes: number;
+  adminsData: AdminUser[];
+}
+

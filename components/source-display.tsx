@@ -1,4 +1,4 @@
-import { DocumentSource } from '@/lib/types';
+import { DocumentSource } from '@/types/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText } from 'lucide-react';

@@ -37,6 +37,12 @@ export const API_CONFIG = {
       UPDATEPASSWORD: '/profile/update_password'
     }
   },
+  ADDMIN_DASHBOARD_API:{
+    BASE_URL: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:4000',
+    ENDPOINTS :{
+      DASHBOARDDATA: '/admin/dashboard',
+    }
+  },
   TIMEOUT: 30000, // 30 seconds
 } as const;
 

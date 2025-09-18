@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { ChatMessage, Session } from "@/lib/types";
+import { ChatMessage, Session } from "@/types/types";
 import { apiService } from "@/lib/api";
 import { ModelType } from "@/config/api";
 import Cookies from "js-cookie";

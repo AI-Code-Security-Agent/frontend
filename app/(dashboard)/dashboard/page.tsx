@@ -40,7 +40,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Session } from "@/lib/types";
+import { Session } from "@/types/types";
 import { AnimatedBackground } from "@/components/animated-background";
 
 
