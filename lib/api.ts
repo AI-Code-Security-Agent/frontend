@@ -18,6 +18,7 @@ import {
   SecurityFormData,
 } from "@/types/types";
 import { promises } from "node:dns";
+import Cookies from "js-cookie";
 
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -28,6 +29,14 @@ class UnifiedApiService {
   constructor() {
     this.ragBaseUrl = API_CONFIG.RAG_API.BASE_URL;
     this.llmBaseUrl = API_CONFIG.LLM_API.BASE_URL;
+  }
+
+  // Helper method to get auth token
+  private getAuthToken(): string | null {
+    if (typeof window !== 'undefined') {
+      return Cookies.get('accessToken') || null;
+    }
+    return null;
   }
 
   // Helper method for fetch with timeout
@@ -55,6 +64,102 @@ class UnifiedApiService {
       throw error;
     }
   }
+
+  // ================================
+  // TITLE GENERATION METHODS - ADD THESE
+  // ================================
+
+  async regenerateTitle(sessionId: string): Promise<ApiResponse<{ title: string }>> {
+    try {
+      const token = this.getAuthToken();
+      if (!token) {
+        return {
+          isSuccess: false,
+          message: 'Authentication required',
+          content: null,
+        };
+      }
+
+      const response = await fetchWithAuth(
+        `${this.llmBaseUrl}${API_CONFIG.SESSION_API.ENDPOINTS.REGENERATE_TITLE}/${sessionId}/regenerate-title`,
+        {
+          method: 'POST',
+        }
+      );
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        return {
+          isSuccess: false,
+          message: data.message || 'Failed to regenerate title',
+          content: null,
+        };
+      }
+
+      return {
+        isSuccess: true,
+        message: data.message,
+        content: { title: data.title },
+      };
+    } catch (error: any) {
+      return {
+        isSuccess: false,
+        message: error.message || 'Network error',
+        content: null,
+      };
+    }
+  }
+
+  async generateTitle(message: string): Promise<ApiResponse<{ title: string }>> {
+    try {
+      const token = this.getAuthToken();
+      if (!token) {
+        return {
+          isSuccess: false,
+          message: 'Authentication required',
+          content: null,
+        };
+      }
+
+      const response = await fetchWithAuth(
+        `${this.llmBaseUrl}${API_CONFIG.LLM_API.ENDPOINTS.GENERATE_TITLE}`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            message,
+            temperature: 0.3,
+          }),
+        }
+      );
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        return {
+          isSuccess: false,
+          message: data.message || 'Failed to generate title',
+          content: null,
+        };
+      }
+
+      return {
+        isSuccess: true,
+        message: 'Title generated successfully',
+        content: { title: data.response },
+      };
+    } catch (error: any) {
+      return {
+        isSuccess: false,
+        message: error.message || 'Network error',
+        content: null,
+      };
+    }
+  }
+
+  // ================================
+  // EXISTING METHODS - KEEP ALL OF THESE UNCHANGED
+  // ================================
 
   // Non-Streaming Methods -Chat
 
@@ -120,9 +225,6 @@ class UnifiedApiService {
         method: "POST",
         body: JSON.stringify(request),
       });
-
-      // console.log('url for LLM Demo Chat:', url);
-      // console.log("LLM Demo Chat response:", response);
 
       if (!response.ok) {
         const errorData: ApiError = await response.json().catch(() => ({
@@ -216,7 +318,6 @@ class UnifiedApiService {
       );
 
       const result = await response.json();
-      // console.log('response :',result)
       if (!response.ok) {
         throw new Error(result.message || "Failed to update feedback");
       }
@@ -357,10 +458,6 @@ class UnifiedApiService {
         const errText = await resp.text().catch(() => "");
         throw new Error(errText || `HTTP ${resp.status}: ${resp.statusText}`);
       }
-      console.log(
-        "Response is ok, starting to read stream response...:",
-        resp.body
-      );
 
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
@@ -419,6 +516,7 @@ class UnifiedApiService {
       handlers.onError?.(e?.message || "LLM stream failed");
     }
   }
+
   async sendDemoMessageStream(
     message: string,
     options: { session_id?: string; max_tokens?: number; temperature?: number },
@@ -428,7 +526,6 @@ class UnifiedApiService {
       onError?: (err: string) => void;
     }
   ) {
-    console.log("Sending Demo Message Stream in api.ts:", message, options);
     return this.llmDemoChatStream(
       {
         message,
@@ -696,7 +793,6 @@ class UnifiedApiService {
       }
 
       const data = await response.json();
-      // console.log("Profile data:", data);
       return data;
     } catch (error) {
       console.error("Error fetching profile data:", error);
@@ -729,7 +825,6 @@ class UnifiedApiService {
       }
 
       const result = await response.json();
-      console.log("Updated personal data:", result);
       return result;
     } catch (error) {
       console.error("Error updating personal data:", error);
@@ -761,7 +856,6 @@ class UnifiedApiService {
       }
 
       const result = await response.json();
-      // console.log("Updated password:", result);
       return result;
     } catch (error) {
       console.error("Error updating password:", error);
@@ -788,7 +882,6 @@ class UnifiedApiService {
       }
 
       const data = await response.json();
-      console.log("Admin Dashboard Data response in function:", data);
       return data
     } catch (err) {
       console.error("Error fetching dashboard data:", err);

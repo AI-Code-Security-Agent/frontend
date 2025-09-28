@@ -17,6 +17,7 @@ export const API_CONFIG = {
       DEMO_CHAT_STREAM:'/chat/demo/stream',
       DEMO_CHAT:'/chat/demo/messages_llm', // demo llm chat endpoint
       MESSAGE_FEEDBACK: '/chat/messages/feedback', // /chat/messages/feedback/:messageId
+      GENERATE_TITLE: '/chat/generate-title',
       
     },
   },
@@ -25,7 +26,8 @@ export const API_CONFIG = {
     ENDPOINTS :{
       SESSIONS: '/chat/sessions',
       SESSIONS_CHATS: '/chat/sessions', //chat/sessions/:sessionId/messages     || chat/sessions/:sessionId/messages/demo
-      SESSION_DELETE: '/chat/delete_session' ///chat/delete_session/:sessionId
+      SESSION_DELETE: '/chat/delete_session', ///chat/delete_session/:sessionId
+      REGENERATE_TITLE: '/chat/sessions',
     }
   },
   PROFILE_API:{

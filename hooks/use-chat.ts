@@ -3,6 +3,7 @@ import { ChatMessage, Session } from "@/types/types";
 import { apiService } from "@/lib/api";
 import { ModelType } from "@/config/api";
 import Cookies from "js-cookie";
+import { toast } from "sonner"; // Add this import
 
 interface UseChatOptions {
   onError?: (error: string) => void;
@@ -27,15 +28,42 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
     setError(null);
   }, []);
 
+  // Add the regenerate title function
+  const regenerateTitle = useCallback(async (sessionId: string) => {
+    try {
+      const result = await apiService.regenerateTitle(sessionId);
+      
+      if (result.isSuccess && result.content) {
+        toast.success("Title regenerated successfully");
+        
+        // Update the sessions list with new title
+        setSessions((prev) =>
+          prev.map((session) =>
+            session._id === sessionId
+              ? { ...session, title: result.content!.title }
+              : session
+          )
+        );
+        
+        return result.content.title;
+      } else {
+        toast.error(result.message || "Failed to regenerate title");
+        return null;
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to regenerate title");
+      console.error("Regenerate title error:", error);
+      return null;
+    }
+  }, []);
+
   const sendMessage = useCallback(
     async (
       content: string,
       modelType: ModelType,
       settings: {
-        // RAG settings
         k?: number;
         relevance_threshold?: number;
-        // LLM settings
         max_tokens?: number;
         temperature?: number;
       } = {}
@@ -65,8 +93,6 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
       setIsLoading(true);
       setError(null);
 
-     // console.log("current ses id:", currentSessionId);
-
       try {
         const response = await apiService.sendMessage(content, modelType, {
           ...settings,
@@ -75,8 +101,6 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
               ? currentSessionId || undefined
               : undefined,
         });
-
-        // console.log("response for look session id:", response);
 
         // Update session ID for LLM
         if (modelType === "llm" && response.sessionId) {
@@ -91,8 +115,6 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
 
         setMessageCount(response.messageCount ?? 0);
 
-        console.log("response:", response);
-
         const assistantMessage: ChatMessage = {
           id: response.messageId || crypto.randomUUID(),
           role: "assistant",
@@ -101,7 +123,7 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
           timestamp: new Date(),
           modelType,
           sessionId: response.sessionId,
-          feedback:  null,
+          feedback: null,
         };
 
         setMessages((prev) =>
@@ -113,6 +135,7 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
         if (modelType !== "llm_demo") {
           fetchSessions(); // Refresh sessions after sending a message
         }
+        
         // Clear loading message
         setMessages((prev) =>
           prev.filter((msg) => msg.id !== loadingMessage.id)
@@ -150,8 +173,6 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
           response = await apiService.getDemoSessionMessages(sessionId);
         }
 
-        // console.log("response for load session messages:", response);
-
         const { session_messages, totalMessages } = response;
 
         const loadedMessages: ChatMessage[] = session_messages.map((msg: any) => ({
@@ -182,8 +203,6 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
     []
   );
 
-  // console.log("messages", messages);
-
   return {
     messages,
     sendMessage,
@@ -197,5 +216,6 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
     sessions,
     setSessions,
     messageCount,
+    regenerateTitle, // Add this to the return object
   };
 }

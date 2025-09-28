@@ -27,6 +27,7 @@ import {
   Database,
   Brain,
   ShieldCheck,
+  RotateCcw, // Add this import for regenerate title button
 } from "lucide-react";
 import { useUnifiedChat } from "@/hooks/use-chat";
 import { apiService } from "@/lib/api";
@@ -59,6 +60,7 @@ export default function DashboardPage() {
     sessions,
     setSessions,
     fetchSessions,
+    regenerateTitle, // Add this from the updated hook
   } = useUnifiedChat();
   const [input, setInput] = useState("");
   const [selectedModel, setSelectedModel] = useState<ModelType>("rag");
@@ -70,7 +72,6 @@ export default function DashboardPage() {
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const [userName, setUserName] = useState<string>("User");
   const [isClient, setIsClient] = useState(false);
-
 
   useEffect(() => {
     fetchSessions();
@@ -116,6 +117,21 @@ export default function DashboardPage() {
     } catch (error: any) {
       toast.error(error.message || "Failed to delete session");
       console.error("Delete session error:", error);
+    }
+  };
+
+  // ADD: Handle regenerate title - NEW FUNCTION
+  const handleRegenerateTitle = async (sessionId: string) => {
+    try {
+      const newTitle = await regenerateTitle(sessionId);
+      if (newTitle) {
+        console.log(`Title regenerated: ${newTitle}`);
+        // The regenerateTitle function already updates the sessions list
+        // via setSessions in the hook, so no additional action needed here
+      }
+    } catch (error: any) {
+      console.error("Regenerate title error:", error);
+      // Error handling is already done in the regenerateTitle function
     }
   };
 
@@ -263,7 +279,6 @@ export default function DashboardPage() {
     setSidebarVisible(!sidebarVisible);
   };
 
-  console.log('side bar state: ', sidebarVisible)
   const isCurrentModelConnected =
     selectedModel === "rag" ? ragConnected : llmConnected;
 
@@ -275,7 +290,7 @@ export default function DashboardPage() {
   return (
     <div className="flex h-screen max-w-full bg-background">
       <AnimatedBackground />
-      {sidebarVisible &&  (
+      {sidebarVisible && (
         <div
           className="fixed inset-0 bg-black/50 z-30 md:hidden"
           onClick={toggleSidebar} // close sidebar when clicking outside
@@ -373,7 +388,7 @@ export default function DashboardPage() {
 
             <Separator className="my-4" />
 
-            {/* Chat history */}
+            {/* UPDATED: Chat history with regenerate title functionality */}
             <div className="mt-4 space-y-2">
               <h2 className="text-sm font-semibold px-2">Chat History</h2>
               <div className="space-y-1 max-h-[350px] overflow-y-auto pr-1 scrollbar-hide relative">
@@ -384,29 +399,45 @@ export default function DashboardPage() {
                   >
                     <Button
                       variant="ghost"
-                      className={`flex-1 justify-start text-xs truncate pr-8 ${
+                      className={`flex-1 justify-start text-xs truncate pr-16 ${
                         session._id === currentSessionId ? "bg-muted" : ""
                       }`}
                       onClick={() => handleSessionClick(session._id)}
                       title={session.title || "Untitled Session"}
                     >
-                      <MessageSquarePlus className="mr-2 h-4 w-4" />
-                      {session.title || "Untitled Session"}
+                      <MessageSquarePlus className="mr-2 h-4 w-4 flex-shrink-0" />
+                      <span className="truncate">{session.title || "Untitled Session"}</span>
                     </Button>
 
-                    {/* Delete icon shown only on hover */}
-                    <ConfirmDeleteDialog
-                      onConfirm={() => handleDeleteSession(session._id)}
-                      description="This will permanently delete the session and its chat history."
-                      trigger={
-                        <button
-                          className="absolute right-2 text-red-500 hover:text-red-700 hidden group-hover:inline"
-                          title="Delete session"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      }
-                    />
+                    {/* UPDATED: Action buttons - shown on hover */}
+                    <div className="absolute right-2 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {/* NEW: Regenerate title button */}
+                      <button
+                        className="text-blue-500 hover:text-blue-700 p-1 rounded"
+                        title="Regenerate title"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRegenerateTitle(session._id);
+                        }}
+                      >
+                        <RotateCcw className="h-3 w-3" />
+                      </button>
+                      
+                      {/* Delete button */}
+                      <ConfirmDeleteDialog
+                        onConfirm={() => handleDeleteSession(session._id)}
+                        description="This will permanently delete the session and its chat history."
+                        trigger={
+                          <button
+                            className="text-red-500 hover:text-red-700 p-1 rounded"
+                            title="Delete session"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        }
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
@@ -433,7 +464,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Main Chat Area */}
+      {/* Main Chat Area - UNCHANGED */}
       <div className="flex-1 flex flex-col w-full">
         {/* Header when sidebar is hidden */}
         {!sidebarVisible && (
@@ -491,7 +522,6 @@ export default function DashboardPage() {
             <div className="max-w-4xl mx-auto px-4 py-6">
               {messages.length === 0 && (
                 <div className="text-center text-muted-foreground py-40">
-                  {/* <Bot className="h-16 w-16 mx-auto mb-6 opacity-50" /> */}
                   <h1 className="text-3xl font-bold mb-4 text-foreground">
                     What can I help with?
                   </h1>
