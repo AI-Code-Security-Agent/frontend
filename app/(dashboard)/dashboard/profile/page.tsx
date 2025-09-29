@@ -11,10 +11,13 @@ import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import Cookies from "js-cookie";
 import { mockRootProps } from "@/lib/mock-data/profilePageMockData";
-import {UserProfile , PersonalInfoFormData, SecurityFormData} from "@/types/types";
+import {
+  UserProfile,
+  PersonalInfoFormData,
+  SecurityFormData,
+} from "@/types/types";
 import { apiService } from "@/lib/api";
 import { AnimatedBackground } from "@/components/animated-background";
-
 
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -28,24 +31,23 @@ export default function ProfilePage() {
     null
   );
 
-const handleGetPersonalInfo = async () => {
-  try {
-    const result = await apiService.getProfileData();
+  const handleGetPersonalInfo = async () => {
+    try {
+      const result = await apiService.getProfileData();
 
-    if (!result.isSuccess || !result.content) {
-      throw new Error("Failed to fetch personal information");
+      if (!result.isSuccess || !result.content) {
+        throw new Error("Failed to fetch personal information");
+      }
+
+      console.log("Fetched user data:", result.content);
+      setUser(result.content);
+    } catch (error) {
+      console.error("Error fetching personal information:", error);
+      toast.error("Failed to fetch personal information");
+    } finally {
+      setIsLoading(false);
     }
-
-    // console.log("Fetched user data:", result.content);
-    setUser(result.content);
-  } catch (error) {
-    console.error("Error fetching personal information:", error);
-    toast.error("Failed to fetch personal information");
-  } finally {
-    setIsLoading(false);
-  }
-};
-
+  };
 
   useEffect(() => {
     handleGetPersonalInfo();
@@ -66,7 +68,7 @@ const handleGetPersonalInfo = async () => {
     setIsUpdatingProfile(true);
     try {
       // API call to update profile
-     const result = await apiService.updatePersonalData(data);
+      const result = await apiService.updatePersonalData(data);
       if (!result.isSuccess) {
         throw new Error("Failed to update profile");
       }
@@ -101,33 +103,75 @@ const handleGetPersonalInfo = async () => {
     }
   };
 
+  // const handleProfileImageChange = async (file: File | null) => {
+  //   setSelectedProfileImage(file);
+
+  //   if (file) {
+  //     try {
+  //       // API call to upload profile picture
+  //       const token = Cookies.get("accessToken");
+  //       const formData = new FormData();
+  //       formData.append("profilePicture", file);
+
+  //       const response = await fetch(`${baseURL}/api/profile/picture`, {
+  //         method: "POST",
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         body: formData,
+  //       });
+
+  //       if (!response.ok) {
+  //         throw new Error("Failed to upload profile picture");
+  //       }
+
+  //       const result = await response.json();
+  //       setUser((prev) =>
+  //         prev ? { ...prev, profilePicture: result.profilePicture } : null
+  //       );
+  //       toast.success("Profile picture updated successfully");
+  //     } catch (error) {
+  //       console.error("Error uploading profile picture:", error);
+  //       toast.error("Failed to upload profile picture");
+  //     }
+  //   }
+  // };
+
   const handleProfileImageChange = async (file: File | null) => {
     setSelectedProfileImage(file);
 
     if (file) {
       try {
-        // API call to upload profile picture
-        const token = Cookies.get("accessToken");
-        const formData = new FormData();
-        formData.append("profilePicture", file);
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const base64String = reader.result as string;
+          console.log("Base64 String:", base64String);
+          const token = Cookies.get("accessToken");
 
-        const response = await fetch(`${baseURL}/api/profile/picture`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        });
+          const response = await fetch(
+            `${baseURL}/profile/update_profile_picture`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ profilePicture: base64String }),
+            }
+          );
 
-        if (!response.ok) {
-          throw new Error("Failed to upload profile picture");
-        }
+          if (!response.ok) {
+            throw new Error("Failed to upload profile picture");
+          }
 
-        const result = await response.json();
-        setUser((prev) =>
-          prev ? { ...prev, profilePicture: result.profilePicture } : null
-        );
-        toast.success("Profile picture updated successfully");
+          const result = await response.json();
+          setUser((prev) =>
+            prev ? { ...prev, profilePicture: result.profilePicture } : null
+          );
+          toast.success("Profile picture updated successfully");
+        };
+
+        reader.readAsDataURL(file); // convert file → base64
       } catch (error) {
         console.error("Error uploading profile picture:", error);
         toast.error("Failed to upload profile picture");
