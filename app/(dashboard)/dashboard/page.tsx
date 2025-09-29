@@ -405,7 +405,7 @@ export default function DashboardPage() {
                       onClick={() => handleSessionClick(session._id)}
                       title={session.title || "Untitled Session"}
                     >
-                      <MessageSquarePlus className="mr-2 h-4 w-4 flex-shrink-0" />
+                      {/* <MessageSquarePlus className="mr-2 h-4 w-4 flex-shrink-0" /> */}
                       <span className="truncate">{session.title || "Untitled Session"}</span>
                     </Button>
 
@@ -595,7 +595,7 @@ export default function DashboardPage() {
                   onKeyDown={handleKeyDown}
                   className="min-h-[52px] max-h-[120px] p-3 border-0 resize-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent"
                   disabled={isLoading || !isCurrentModelConnected}
-                  maxLength={1000}
+                  // maxLength={1000}
                   style={{
                     scrollbarWidth: "thin",
                     scrollbarColor: "rgba(155, 155, 155, 0.5) transparent",
@@ -706,7 +706,7 @@ export default function DashboardPage() {
             <div className="flex flex-wrap justify-center items-center mt-3 text-xs text-muted-foreground gap-2 text-center">
               <span>Press Enter to send, Shift+Enter for new line</span>
               <span>•</span>
-              <span>{input.length}/1000</span>
+              {/* <span>{input.length}/1000</span> */}
               <span>•</span>
               <span className="flex items-center justify-center">
                 <ModelIcon className="h-3 w-3 mr-1" />
