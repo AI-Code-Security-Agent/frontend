@@ -43,6 +43,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Session } from "@/types/types";
 import { AnimatedBackground } from "@/components/animated-background";
+import ProtectedLayout from "@/components/auth/protected-layout";
+import { useAuth } from "@/components/auth/auth-provider";
 
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -60,7 +62,7 @@ export default function DashboardPage() {
     sessions,
     setSessions,
     fetchSessions,
-    regenerateTitle, // Add this from the updated hook
+    regenerateTitle,
   } = useUnifiedChat();
   const [input, setInput] = useState("");
   const [selectedModel, setSelectedModel] = useState<ModelType>("rag");
@@ -73,9 +75,13 @@ export default function DashboardPage() {
   const [userName, setUserName] = useState<string>("User");
   const [isClient, setIsClient] = useState(false);
 
+  const { isAuthenticated, isLoading: authLoading, signOut } = useAuth();
+
   useEffect(() => {
-    fetchSessions();
-  }, []);
+    if (!authLoading && isAuthenticated) {
+      fetchSessions();
+    }
+  }, [authLoading, isAuthenticated, fetchSessions]);
 
   useEffect(() => {
     const cookieSessionId = Cookies.get("sessionId");
@@ -245,34 +251,7 @@ export default function DashboardPage() {
   };
 
   const handleLogout = async () => {
-    const token = Cookies.get("accessToken");
-    if (!token) {
-      console.log("Access token not found.");
-      return;
-    }
-    try {
-      const response = await fetch(`${baseURL}/auth/logout`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        credentials: "include",
-      });
-      const data = await response.json();
-      if (data.isSuccess) {
-        Cookies.remove("accessToken");
-        Cookies.remove("userName");
-        Cookies.remove("sessionId");
-        router.push("/");
-        toast.success(data.message);
-      } else {
-        toast.error("Logout failed. Please try again.");
-      }
-    } catch (err) {
-      console.log("error :", err);
-      toast.error("An error occurred while logging out.");
-    }
+    await signOut();
   };
 
   const toggleSidebar = () => {
@@ -288,434 +267,438 @@ export default function DashboardPage() {
     selectedModel === "rag" ? "Knowledge Base" : "Conversational AI";
 
   return (
-    <div className="flex h-screen max-w-full bg-background">
-      <AnimatedBackground />
-      {sidebarVisible && (
+    <ProtectedLayout>
+      <div className="flex h-screen max-w-full bg-background">
+        <AnimatedBackground />
+        {sidebarVisible && (
+          <div
+            className="fixed inset-0 bg-black/50 z-30 md:hidden"
+            onClick={toggleSidebar} // close sidebar when clicking outside
+          />
+        )}
         <div
-          className="fixed inset-0 bg-black/50 z-30 md:hidden"
-          onClick={toggleSidebar} // close sidebar when clicking outside
-        />
-      )}
-      <div
-        className={`${sidebarVisible ? "w-64" : "w-0"} 
+          className={`${sidebarVisible ? "w-64" : "w-0"} 
               border-r bg-muted/90 dark:bg-gray-900/95 
               transition-all duration-300 ease-in-out 
               overflow-hidden fixed md:relative z-40 h-full`}
-      >
-        <div className="flex h-14 items-center justify-between border-b px-4">
-          <div className="flex items-center">
-            <Bot className="h-6 w-6" />
-            <span className="ml-2 font-bold">Code Guardian</span>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleSidebar}
-            className="h-8 w-8"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <div className="flex flex-col h-[calc(100vh-3.5rem)]">
-          <div className="flex-1 overflow-auto p-4">
-            <Button
-              variant="outline"
-              className="w-full justify-start mb-2 rounded-full text-sm"
-              onClick={clearChat}
-              disabled={isLoading}
-            >
-              <MessageSquarePlus className="mr-2 h-4 w-4" />
-              New Chat
-            </Button>
-
-            <Button
-              variant="outline"
-              className="w-full justify-start mb-3 rounded-full text-sm"
-              onClick={() => setShowSettings(!showSettings)}
-            >
-              <Settings className="mr-2 h-4 w-4" />
-              Model Settings
-            </Button>
-
-            <Button
-              variant="outline"
-              className="w-full justify-start mb-3 rounded-full text-sm"
-              onClick={() => router.push("/dashboard/admin")}
-            >
-              <ShieldCheck className="mr-2 h-4 w-4" />
-              Admin Dashboard
-            </Button>
-
-            {showSettings && (
-              <ModelSettings
-                selectedModel={selectedModel}
-                ragSettings={ragSettings}
-                llmSettings={llmSettings}
-                onRagSettingsChange={setRagSettings}
-                onLLMSettingsChange={setLlmSettings}
-              />
-            )}
-
-            <Separator className="my-4" />
-
-            {/* Connection Status */}
-            <div className="space-y-2">
-              <h2 className="text-sm font-semibold">Connection Status</h2>
-              <div className="space-y-1">
-                <div
-                  className={`text-xs px-4 py-1 flex items-center justify-between rounded-full ${
-                    ragConnected
-                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                      : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                  }`}
-                >
-                  <span>RAG API</span>
-                  <span>{ragConnected ? "🟢" : "🔴"}</span>
-                </div>
-                <div
-                  className={`text-xs px-4 py-1 flex items-center justify-between rounded-full ${
-                    llmConnected
-                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                      : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                  }`}
-                >
-                  <span>LLM API</span>
-                  <span>{llmConnected ? "🟢" : "🔴"}</span>
-                </div>
-              </div>
-            </div>
-
-            <Separator className="my-4" />
-
-            {/* UPDATED: Chat history with regenerate title functionality */}
-            <div className="mt-4 space-y-2">
-              <h2 className="text-sm font-semibold px-2">Chat History</h2>
-              <div className="space-y-1 max-h-[350px] overflow-y-auto pr-1 scrollbar-hide relative">
-                {sessions.map((session) => (
-                  <div
-                    key={session._id}
-                    className="group relative flex items-center w-full"
-                  >
-                    <Button
-                      variant="ghost"
-                      className={`flex-1 justify-start text-xs truncate pr-16 ${
-                        session._id === currentSessionId ? "bg-muted" : ""
-                      }`}
-                      onClick={() => handleSessionClick(session._id)}
-                      title={session.title || "Untitled Session"}
-                    >
-                      {/* <MessageSquarePlus className="mr-2 h-4 w-4 flex-shrink-0" /> */}
-                      <span className="truncate">{session.title || "Untitled Session"}</span>
-                    </Button>
-
-                    {/* UPDATED: Action buttons - shown on hover */}
-                    <div className="absolute right-2 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {/* NEW: Regenerate title button */}
-                      <button
-                        className="text-blue-500 hover:text-blue-700 p-1 rounded"
-                        title="Regenerate title"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRegenerateTitle(session._id);
-                        }}
-                      >
-                        <RotateCcw className="h-3 w-3" />
-                      </button>
-                      
-                      {/* Delete button */}
-                      <ConfirmDeleteDialog
-                        onConfirm={() => handleDeleteSession(session._id)}
-                        description="This will permanently delete the session and its chat history."
-                        trigger={
-                          <button
-                            className="text-red-500 hover:text-red-700 p-1 rounded"
-                            title="Delete session"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </button>
-                        }
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* User Menu */}
-          <div className="border-t p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <UserMenu
-                  userName={userName}
-                  isClient={isClient}
-                  onLogout={handleLogout}
-                />
-              </div>
-              {sidebarVisible && (
-                <div className="ml-2">
-                  <ThemeToggle />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Chat Area - UNCHANGED */}
-      <div className="flex-1 flex flex-col w-full">
-        {/* Header when sidebar is hidden */}
-        {!sidebarVisible && (
-          <div className="flex items-center justify-between h-14 border-b px-4 ">
+        >
+          <div className="flex h-14 items-center justify-between border-b px-4">
             <div className="flex items-center">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleSidebar}
-                className="h-8 w-8 mr-2"
-              >
-                <Menu className="h-4 w-4" />
-              </Button>
               <Bot className="h-6 w-6" />
               <span className="ml-2 font-bold">Code Guardian</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <ThemeToggle />
-              <Button
-                variant="ghost"
-                title="Log Out"
-                size="icon"
-                onClick={handleLogout}
-                className="cursor-pointer"
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleSidebar}
+              className="h-8 w-8"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
           </div>
-        )}
 
-        {/* Error Alert */}
-        {(error || connectionError) && (
-          <Alert className="m-4 mb-0">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="flex items-center justify-between">
-              <span>{error || connectionError}</span>
+          <div className="flex flex-col h-[calc(100vh-3.5rem)]">
+            <div className="flex-1 overflow-auto p-4">
               <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  clearError();
-                  setConnectionError(null);
-                }}
+                variant="outline"
+                className="w-full justify-start mb-2 rounded-full text-sm"
+                onClick={clearChat}
+                disabled={isLoading}
               >
-                <X className="h-4 w-4" />
+                <MessageSquarePlus className="mr-2 h-4 w-4" />
+                New Chat
               </Button>
-            </AlertDescription>
-          </Alert>
-        )}
 
-        {/* Chat Messages Area */}
-        <div className="flex-1 overflow-hidden">
-          <ScrollArea className="h-full" ref={scrollAreaRef}>
-            <div className="max-w-4xl mx-auto px-4 py-6">
-              {messages.length === 0 && (
-                <div className="text-center text-muted-foreground py-40">
-                  <h1 className="text-3xl font-bold mb-4 text-foreground">
-                    What can I help with?
-                  </h1>
-                  <p className="text-md mb-8">
-                    Choose between RAG (Knowledge Base) or LLM (Conversational
-                    AI) mode and start chatting!
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
-                    <div
-                      className="p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                      onClick={() => {
-                        const message = "What topics can you help me with?";
-                        sendMessage(
-                          message,
-                          selectedModel,
-                          selectedModel === "rag" ? ragSettings : llmSettings
-                        );
-                      }}
-                    >
-                      <h3 className="font-semibold mb-2">Explore Topics</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Discover what I can help you with
-                      </p>
-                    </div>
-                    <div
-                      className="p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                      onClick={() => {
-                        const message =
-                          selectedModel === "rag"
-                            ? "Give me a summary of the most important information."
-                            : "Can you explain what you're capable of?";
-                        sendMessage(
-                          message,
-                          selectedModel,
-                          selectedModel === "rag" ? ragSettings : llmSettings
-                        );
-                      }}
-                    >
-                      <h3 className="font-semibold mb-2">Get Started</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Learn about my capabilities
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-              {messages.map((message) => (
-                <ChatMessage key={message.id} message={message} />
-              ))}
-            </div>
-          </ScrollArea>
-        </div>
+              <Button
+                variant="outline"
+                className="w-full justify-start mb-3 rounded-full text-sm"
+                onClick={() => setShowSettings(!showSettings)}
+              >
+                <Settings className="mr-2 h-4 w-4" />
+                Model Settings
+              </Button>
 
-        {/* Input Area - Fixed at bottom */}
-        <div className="bg-background">
-          <div className="max-w-4xl mx-auto p-4">
-            <form onSubmit={handleSubmit} className="relative">
-              <div className="flex flex-col bg-background border rounded-3xl shadow-sm hover:shadow-md transition-shadow">
-                {/* Input Textarea */}
-                <Textarea
-                  ref={textareaRef}
-                  placeholder={
-                    !isCurrentModelConnected
-                      ? `${selectedModel.toUpperCase()} API not connected...`
-                      : isLoading
-                      ? "Waiting for response..."
-                      : `Message ${modelLabel}...`
-                  }
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  className="min-h-[52px] max-h-[120px] p-3 border-0 resize-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent"
-                  disabled={isLoading || !isCurrentModelConnected}
-                  // maxLength={1000}
-                  style={{
-                    scrollbarWidth: "thin",
-                    scrollbarColor: "rgba(155, 155, 155, 0.5) transparent",
-                  }}
+              <Button
+                variant="outline"
+                className="w-full justify-start mb-3 rounded-full text-sm"
+                onClick={() => router.push("/dashboard/admin")}
+              >
+                <ShieldCheck className="mr-2 h-4 w-4" />
+                Admin Dashboard
+              </Button>
+
+              {showSettings && (
+                <ModelSettings
+                  selectedModel={selectedModel}
+                  ragSettings={ragSettings}
+                  llmSettings={llmSettings}
+                  onRagSettingsChange={setRagSettings}
+                  onLLMSettingsChange={setLlmSettings}
                 />
-                {/* Buttons Row */}
-                <div className="flex justify-between items-center p-2">
-                  {/* Left-Aligned Model Selector */}
-                  <div className="flex items-center space-x-2">
-                    <DropdownMenu
-                      open={isModelDropdownOpen}
-                      onOpenChange={setIsModelDropdownOpen}
-                    >
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 px-4 text-xs font-medium hover:bg-muted/50 rounded-full"
-                          disabled={isLoading}
-                        >
-                          <ModelIcon className="h-3 w-3 mr-2" />
-                          <span>{modelLabel}</span>
-                          <ChevronDown className="h-3 w-3 ml-1" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start" className="w-56">
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelectedModel("rag");
-                            setIsModelDropdownOpen(false);
-                          }}
-                          disabled={!ragConnected}
-                          className="flex items-center justify-between"
-                        >
-                          <div className="flex items-center">
-                            <Database className="h-4 w-4 mr-2" />
-                            <div>
-                              <div className="font-medium">RAG</div>
-                              <div className="text-xs text-muted-foreground">
-                                Knowledge Base Search
-                              </div>
-                            </div>
-                          </div>
-                          <div
-                            className={`w-2 h-2 rounded-full ${
-                              ragConnected ? "bg-green-500" : "bg-red-500"
-                            }`}
-                          />
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelectedModel("llm");
-                            setIsModelDropdownOpen(false);
-                          }}
-                          disabled={!llmConnected}
-                          className="flex items-center justify-between"
-                        >
-                          <div className="flex items-center">
-                            <Brain className="h-4 w-4 mr-2" />
-                            <div>
-                              <div className="font-medium">LLM</div>
-                              <div className="text-xs text-muted-foreground">
-                                Conversational AI
-                              </div>
-                            </div>
-                          </div>
-                          <div
-                            className={`w-2 h-2 rounded-full ${
-                              llmConnected ? "bg-green-500" : "bg-red-500"
-                            }`}
-                          />
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+              )}
+
+              <Separator className="my-4" />
+
+              {/* Connection Status */}
+              <div className="space-y-2">
+                <h2 className="text-sm font-semibold">Connection Status</h2>
+                <div className="space-y-1">
+                  <div
+                    className={`text-xs px-4 py-1 flex items-center justify-between rounded-full ${
+                      ragConnected
+                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                        : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                    }`}
+                  >
+                    <span>RAG API</span>
+                    <span>{ragConnected ? "🟢" : "🔴"}</span>
                   </div>
-                  {/* Right-Aligned Action Buttons */}
-                  <div className="flex items-center space-x-2">
-                    {messages.length > 0 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={clearChat}
-                        disabled={isLoading}
-                        size="sm"
-                        className="h-8 w-8 p-0 hover:bg-muted/50"
-                        title="Clear Chat"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                    <Button
-                      type="submit"
-                      disabled={
-                        isLoading || !isCurrentModelConnected || !input.trim()
-                      }
-                      size="sm"
-                      className="h-8 w-8 p-0 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
-                      title="Send Message"
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
+                  <div
+                    className={`text-xs px-4 py-1 flex items-center justify-between rounded-full ${
+                      llmConnected
+                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                        : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                    }`}
+                  >
+                    <span>LLM API</span>
+                    <span>{llmConnected ? "🟢" : "🔴"}</span>
                   </div>
                 </div>
               </div>
-            </form>
 
-            {/* Footer Info */}
-            <div className="flex flex-wrap justify-center items-center mt-3 text-xs text-muted-foreground gap-2 text-center">
-              <span>Press Enter to send, Shift+Enter for new line</span>
-              <span>•</span>
-              {/* <span>{input.length}/1000</span> */}
-              <span>•</span>
-              <span className="flex items-center justify-center">
-                <ModelIcon className="h-3 w-3 mr-1" />
-                {modelDescription}
-              </span>
+              <Separator className="my-4" />
+
+              {/* UPDATED: Chat history with regenerate title functionality */}
+              <div className="mt-4 space-y-2">
+                <h2 className="text-sm font-semibold px-2">Chat History</h2>
+                <div className="space-y-1 max-h-[350px] overflow-y-auto pr-1 scrollbar-hide relative">
+                  {sessions.map((session) => (
+                    <div
+                      key={session._id}
+                      className="group relative flex items-center w-full"
+                    >
+                      <Button
+                        variant="ghost"
+                        className={`flex-1 justify-start text-xs truncate pr-16 ${
+                          session._id === currentSessionId ? "bg-muted" : ""
+                        }`}
+                        onClick={() => handleSessionClick(session._id)}
+                        title={session.title || "Untitled Session"}
+                      >
+                        {/* <MessageSquarePlus className="mr-2 h-4 w-4 flex-shrink-0" /> */}
+                        <span className="truncate">
+                          {session.title || "Untitled Session"}
+                        </span>
+                      </Button>
+
+                      {/* UPDATED: Action buttons - shown on hover */}
+                      <div className="absolute right-2 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {/* NEW: Regenerate title button */}
+                        <button
+                          className="text-blue-500 hover:text-blue-700 p-1 rounded"
+                          title="Regenerate title"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRegenerateTitle(session._id);
+                          }}
+                        >
+                          <RotateCcw className="h-3 w-3" />
+                        </button>
+
+                        {/* Delete button */}
+                        <ConfirmDeleteDialog
+                          onConfirm={() => handleDeleteSession(session._id)}
+                          description="This will permanently delete the session and its chat history."
+                          trigger={
+                            <button
+                              className="text-red-500 hover:text-red-700 p-1 rounded"
+                              title="Delete session"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          }
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* User Menu */}
+            <div className="border-t p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <UserMenu
+                    userName={userName}
+                    isClient={isClient}
+                    onLogout={handleLogout}
+                  />
+                </div>
+                {sidebarVisible && (
+                  <div className="ml-2">
+                    <ThemeToggle />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Chat Area - UNCHANGED */}
+        <div className="flex-1 flex flex-col w-full">
+          {/* Header when sidebar is hidden */}
+          {!sidebarVisible && (
+            <div className="flex items-center justify-between h-14 border-b px-4 ">
+              <div className="flex items-center">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleSidebar}
+                  className="h-8 w-8 mr-2"
+                >
+                  <Menu className="h-4 w-4" />
+                </Button>
+                <Bot className="h-6 w-6" />
+                <span className="ml-2 font-bold">Code Guardian</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <ThemeToggle />
+                <Button
+                  variant="ghost"
+                  title="Log Out"
+                  size="icon"
+                  onClick={handleLogout}
+                  className="cursor-pointer"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Error Alert */}
+          {(error || connectionError) && (
+            <Alert className="m-4 mb-0">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="flex items-center justify-between">
+                <span>{error || connectionError}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    clearError();
+                    setConnectionError(null);
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Chat Messages Area */}
+          <div className="flex-1 overflow-hidden">
+            <ScrollArea className="h-full" ref={scrollAreaRef}>
+              <div className="max-w-4xl mx-auto px-4 py-6">
+                {messages.length === 0 && (
+                  <div className="text-center text-muted-foreground py-40">
+                    <h1 className="text-3xl font-bold mb-4 text-foreground">
+                      What can I help with?
+                    </h1>
+                    <p className="text-md mb-8">
+                      Choose between RAG (Knowledge Base) or LLM (Conversational
+                      AI) mode and start chatting!
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                      <div
+                        className="p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                        onClick={() => {
+                          const message = "What topics can you help me with?";
+                          sendMessage(
+                            message,
+                            selectedModel,
+                            selectedModel === "rag" ? ragSettings : llmSettings
+                          );
+                        }}
+                      >
+                        <h3 className="font-semibold mb-2">Explore Topics</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Discover what I can help you with
+                        </p>
+                      </div>
+                      <div
+                        className="p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                        onClick={() => {
+                          const message =
+                            selectedModel === "rag"
+                              ? "Give me a summary of the most important information."
+                              : "Can you explain what you're capable of?";
+                          sendMessage(
+                            message,
+                            selectedModel,
+                            selectedModel === "rag" ? ragSettings : llmSettings
+                          );
+                        }}
+                      >
+                        <h3 className="font-semibold mb-2">Get Started</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Learn about my capabilities
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {messages.map((message) => (
+                  <ChatMessage key={message.id} message={message} />
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
+
+          {/* Input Area - Fixed at bottom */}
+          <div className="bg-background">
+            <div className="max-w-4xl mx-auto p-4">
+              <form onSubmit={handleSubmit} className="relative">
+                <div className="flex flex-col bg-background border rounded-3xl shadow-sm hover:shadow-md transition-shadow">
+                  {/* Input Textarea */}
+                  <Textarea
+                    ref={textareaRef}
+                    placeholder={
+                      !isCurrentModelConnected
+                        ? `${selectedModel.toUpperCase()} API not connected...`
+                        : isLoading
+                        ? "Waiting for response..."
+                        : `Message ${modelLabel}...`
+                    }
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    className="min-h-[52px] max-h-[120px] p-3 border-0 resize-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent"
+                    disabled={isLoading || !isCurrentModelConnected}
+                    // maxLength={1000}
+                    style={{
+                      scrollbarWidth: "thin",
+                      scrollbarColor: "rgba(155, 155, 155, 0.5) transparent",
+                    }}
+                  />
+                  {/* Buttons Row */}
+                  <div className="flex justify-between items-center p-2">
+                    {/* Left-Aligned Model Selector */}
+                    <div className="flex items-center space-x-2">
+                      <DropdownMenu
+                        open={isModelDropdownOpen}
+                        onOpenChange={setIsModelDropdownOpen}
+                      >
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-4 text-xs font-medium hover:bg-muted/50 rounded-full"
+                            disabled={isLoading}
+                          >
+                            <ModelIcon className="h-3 w-3 mr-2" />
+                            <span>{modelLabel}</span>
+                            <ChevronDown className="h-3 w-3 ml-1" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="w-56">
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedModel("rag");
+                              setIsModelDropdownOpen(false);
+                            }}
+                            disabled={!ragConnected}
+                            className="flex items-center justify-between"
+                          >
+                            <div className="flex items-center">
+                              <Database className="h-4 w-4 mr-2" />
+                              <div>
+                                <div className="font-medium">RAG</div>
+                                <div className="text-xs text-muted-foreground">
+                                  Knowledge Base Search
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              className={`w-2 h-2 rounded-full ${
+                                ragConnected ? "bg-green-500" : "bg-red-500"
+                              }`}
+                            />
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedModel("llm");
+                              setIsModelDropdownOpen(false);
+                            }}
+                            disabled={!llmConnected}
+                            className="flex items-center justify-between"
+                          >
+                            <div className="flex items-center">
+                              <Brain className="h-4 w-4 mr-2" />
+                              <div>
+                                <div className="font-medium">LLM</div>
+                                <div className="text-xs text-muted-foreground">
+                                  Conversational AI
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              className={`w-2 h-2 rounded-full ${
+                                llmConnected ? "bg-green-500" : "bg-red-500"
+                              }`}
+                            />
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                    {/* Right-Aligned Action Buttons */}
+                    <div className="flex items-center space-x-2">
+                      {messages.length > 0 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={clearChat}
+                          disabled={isLoading}
+                          size="sm"
+                          className="h-8 w-8 p-0 hover:bg-muted/50"
+                          title="Clear Chat"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button
+                        type="submit"
+                        disabled={
+                          isLoading || !isCurrentModelConnected || !input.trim()
+                        }
+                        size="sm"
+                        className="h-8 w-8 p-0 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
+                        title="Send Message"
+                      >
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+
+              {/* Footer Info */}
+              <div className="flex flex-wrap justify-center items-center mt-3 text-xs text-muted-foreground gap-2 text-center">
+                <span>Press Enter to send, Shift+Enter for new line</span>
+                <span>•</span>
+                {/* <span>{input.length}/1000</span> */}
+                <span>•</span>
+                <span className="flex items-center justify-center">
+                  <ModelIcon className="h-3 w-3 mr-1" />
+                  {modelDescription}
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </ProtectedLayout>
   );
 }

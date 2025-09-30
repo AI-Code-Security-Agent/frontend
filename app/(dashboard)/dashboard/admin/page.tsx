@@ -52,6 +52,7 @@ import {
 import { AnimatedBackground } from "@/components/animated-background";
 import { apiService } from "@/lib/api";
 import { AdminDashboardContent, AdminUser } from "@/types/types";
+import ProtectedLayout from "@/components/auth/protected-layout";
 
 // ✅ Validation schema
 const formSchema = z.object({
@@ -181,225 +182,227 @@ export default function AdminDashboard() {
       : "0";
 
   return (
-    <div className="p-6 space-y-6">
-      <AnimatedBackground />
+    <ProtectedLayout>
+      <div className="p-6 space-y-6">
+        <AnimatedBackground />
 
-      {/* Header with Back + Create Admin */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-        {/* Left section */}
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push("/dashboard")}
-            className="hover:bg-muted/50"
-          >
-            <ChevronLeft className="h-4 w-4 mr-2" />
-            Back 
-          </Button>
-          <div className="hidden md:block h-6 w-px bg-border mx-2" />
-          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary/50 to-primary bg-clip-text text-transparent">
-            System Analytics
-          </h1>
+        {/* Header with Back + Create Admin */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+          {/* Left section */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.push("/dashboard")}
+              className="hover:bg-muted/50"
+            >
+              <ChevronLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
+            <div className="hidden md:block h-6 w-px bg-border mx-2" />
+            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary/50 to-primary bg-clip-text text-transparent">
+              System Analytics
+            </h1>
+          </div>
+
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="bg-blue-500 text-white flex items-center gap-2 hover:bg-blue-600 w-full md:w-auto">
+                <Plus className="h-4 w-4" />
+                Create Admin
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create a New Admin</DialogTitle>
+                <DialogDescription>
+                  Fill in the details below to create a new admin account.
+                </DialogDescription>
+              </DialogHeader>
+
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-4"
+                >
+                  <FormField
+                    control={form.control}
+                    name="fullName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Full Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter full name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="Enter email address"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button type="submit" className="w-full">
+                    {isLoading ? "Creating..." : "Create Admin"}
+                  </Button>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
         </div>
 
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button className="bg-blue-500 text-white flex items-center gap-2 hover:bg-blue-600 w-full md:w-auto">
-              <Plus className="h-4 w-4" />
-              Create Admin
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create a New Admin</DialogTitle>
-              <DialogDescription>
-                Fill in the details below to create a new admin account.
-              </DialogDescription>
-            </DialogHeader>
-
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
-              >
-                <FormField
-                  control={form.control}
-                  name="fullName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter full name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="email"
-                          placeholder="Enter email address"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button type="submit" className="w-full">
-                  {isLoading ? "Creating..." : "Create Admin"}
-                </Button>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
-          <div className="flex items-center space-x-2">
-            <Users className="h-4 w-4 text-blue-500" />
-            <h3 className="text-sm font-medium">Total Users</h3>
-          </div>
-          <p className="text-2xl font-bold mt-2">{totalUsers}</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            {totalUsers} users registered.
-          </p>
-        </Card>
-
-        <Card className="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
-          <div className="flex items-center space-x-2">
-            <ShieldCheck className="h-4 w-4 text-green-500" />
-            <h3 className="text-sm font-medium">Total Admins</h3>
-          </div>
-          <p className="text-2xl font-bold mt-2">{totalAdmins}</p>
-        </Card>
-
-        <Card className="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
-          <div className="flex items-center space-x-2">
-            <Activity className="h-4 w-4 text-orange-500" />
-            <h3 className="text-sm font-medium">Chat Sessions</h3>
-          </div>
-          <p className="text-2xl font-bold mt-2">{totalSessions}</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            {totalSessions} total chat sessions
-          </p>
-        </Card>
-
-        <Card className="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
-          <div className="flex items-center space-x-2">
-            <Activity className="h-4 w-4 text-orange-500" />
-            <h3 className="text-sm font-medium">Demo Chat Sessions</h3>
-          </div>
-          <p className="text-2xl font-bold mt-2">{totalDemoSessions}</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            {totalDemoSessions} total demo sessions
-          </p>
-        </Card>
-
-        {/* Message Statistics */}
-        <Card className="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
-          <div className="flex items-center space-x-2">
-            <MessageCircle className="h-4 w-4 text-blue-500" />
-            <h3 className="text-sm font-medium">Total Messages</h3>
-          </div>
-          <p className="text-2xl font-bold mt-2">{totalChats}</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            {totalChats} total chats.
-          </p>
-        </Card>
-
-        <Card className="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
-          <div className="flex items-center space-x-2 mb-3">
-            <MessageCircle className="h-4 w-4 text-purple-500" />
-            <h3 className="text-sm font-medium">Message Breakdown</h3>
-          </div>
-
-          <div className="flex justify-between">
-            <div className="flex-1">
-              <p className="text-xl font-bold text-blue-600">
-                {totalUserChats}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                User Messages
-              </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
+            <div className="flex items-center space-x-2">
+              <Users className="h-4 w-4 text-blue-500" />
+              <h3 className="text-sm font-medium">Total Users</h3>
             </div>
-            <div className="flex-1 text-right">
-              <p className="text-xl font-bold text-purple-600">
-                {totalAssistantChats}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Assistant Messages
-              </p>
+            <p className="text-2xl font-bold mt-2">{totalUsers}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {totalUsers} users registered.
+            </p>
+          </Card>
+
+          <Card className="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
+            <div className="flex items-center space-x-2">
+              <ShieldCheck className="h-4 w-4 text-green-500" />
+              <h3 className="text-sm font-medium">Total Admins</h3>
             </div>
-          </div>
-        </Card>
+            <p className="text-2xl font-bold mt-2">{totalAdmins}</p>
+          </Card>
 
-        <Card className="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
-          <div className="flex items-center space-x-2">
-            <ThumbsUp className="h-4 w-4 text-green-500" />
-            <h3 className="text-sm font-medium">Message Likes</h3>
-          </div>
-          <p className="text-2xl font-bold mt-2">{totalLikes}</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            {likePercentage}% satisfaction rate
-          </p>
-        </Card>
+          <Card className="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
+            <div className="flex items-center space-x-2">
+              <Activity className="h-4 w-4 text-orange-500" />
+              <h3 className="text-sm font-medium">Chat Sessions</h3>
+            </div>
+            <p className="text-2xl font-bold mt-2">{totalSessions}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {totalSessions} total chat sessions
+            </p>
+          </Card>
 
-        <Card className="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
-          <div className="flex items-center space-x-2">
-            <ThumbsDown className="h-4 w-4 text-red-500" />
-            <h3 className="text-sm font-medium">Message Unlikes</h3>
-          </div>
-          <p className="text-2xl font-bold mt-2">{totalDislikes}</p>
-        </Card>
-      </div>
+          <Card className="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
+            <div className="flex items-center space-x-2">
+              <Activity className="h-4 w-4 text-orange-500" />
+              <h3 className="text-sm font-medium">Demo Chat Sessions</h3>
+            </div>
+            <p className="text-2xl font-bold mt-2">{totalDemoSessions}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {totalDemoSessions} total demo sessions
+            </p>
+          </Card>
 
-      {/* Users Table */}
-      <Card className="mt-6 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
-        <ScrollArea className="h-[400px] w-full">
-          <Table>
-            <TableCaption>List of all users</TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {adminData && adminData.length > 0 ? (
-                adminData.map((admin: AdminUser) => (
-                  <TableRow key={admin._id}>
-                    <TableCell>{admin.fullname}</TableCell>
-                    <TableCell>{admin.email}</TableCell>
-                    <TableCell>
-                      <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                        {admin.role}
-                      </span>
+          {/* Message Statistics */}
+          <Card className="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
+            <div className="flex items-center space-x-2">
+              <MessageCircle className="h-4 w-4 text-blue-500" />
+              <h3 className="text-sm font-medium">Total Messages</h3>
+            </div>
+            <p className="text-2xl font-bold mt-2">{totalChats}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {totalChats} total chats.
+            </p>
+          </Card>
+
+          <Card className="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
+            <div className="flex items-center space-x-2 mb-3">
+              <MessageCircle className="h-4 w-4 text-purple-500" />
+              <h3 className="text-sm font-medium">Message Breakdown</h3>
+            </div>
+
+            <div className="flex justify-between">
+              <div className="flex-1">
+                <p className="text-xl font-bold text-blue-600">
+                  {totalUserChats}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  User Messages
+                </p>
+              </div>
+              <div className="flex-1 text-right">
+                <p className="text-xl font-bold text-purple-600">
+                  {totalAssistantChats}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Assistant Messages
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
+            <div className="flex items-center space-x-2">
+              <ThumbsUp className="h-4 w-4 text-green-500" />
+              <h3 className="text-sm font-medium">Message Likes</h3>
+            </div>
+            <p className="text-2xl font-bold mt-2">{totalLikes}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {likePercentage}% satisfaction rate
+            </p>
+          </Card>
+
+          <Card className="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
+            <div className="flex items-center space-x-2">
+              <ThumbsDown className="h-4 w-4 text-red-500" />
+              <h3 className="text-sm font-medium">Message Unlikes</h3>
+            </div>
+            <p className="text-2xl font-bold mt-2">{totalDislikes}</p>
+          </Card>
+        </div>
+
+        {/* Users Table */}
+        <Card className="mt-6 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
+          <ScrollArea className="h-[400px] w-full">
+            <Table>
+              <TableCaption>List of all users</TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Role</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {adminData && adminData.length > 0 ? (
+                  adminData.map((admin: AdminUser) => (
+                    <TableRow key={admin._id}>
+                      <TableCell>{admin.fullname}</TableCell>
+                      <TableCell>{admin.email}</TableCell>
+                      <TableCell>
+                        <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                          {admin.role}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center">
+                      No admins found
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={3} className="text-center">
-                    No admins found
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </ScrollArea>
-      </Card>
-    </div>
+                )}
+              </TableBody>
+            </Table>
+          </ScrollArea>
+        </Card>
+      </div>
+    </ProtectedLayout>
   );
 }

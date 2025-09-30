@@ -18,6 +18,8 @@ import {
 } from "@/types/types";
 import { apiService } from "@/lib/api";
 import { AnimatedBackground } from "@/components/animated-background";
+import ProtectedLayout from "@/components/auth/protected-layout";
+import { useAuth } from "@/components/auth/auth-provider";
 
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -30,16 +32,13 @@ export default function ProfilePage() {
   const [selectedProfileImage, setSelectedProfileImage] = useState<File | null>(
     null
   );
-
-  const handleGetPersonalInfo = async () => {
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const fetchProfile = async () => {
     try {
       const result = await apiService.getProfileData();
-
       if (!result.isSuccess || !result.content) {
         throw new Error("Failed to fetch personal information");
       }
-
-      console.log("Fetched user data:", result.content);
       setUser(result.content);
     } catch (error) {
       console.error("Error fetching personal information:", error);
@@ -50,8 +49,10 @@ export default function ProfilePage() {
   };
 
   useEffect(() => {
-    handleGetPersonalInfo();
-  }, []);
+    if (!authLoading && isAuthenticated) {
+      fetchProfile();
+    }
+  }, [isAuthenticated, authLoading]);
 
   const getProfileImage = () => {
     return user?.profilePicture || mockRootProps.user.profilePicture;
@@ -181,87 +182,93 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <AnimatedBackground />
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Loading profile...</p>
+      <ProtectedLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <AnimatedBackground />
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p>Loading profile...</p>
+          </div>
         </div>
-      </div>
+      </ProtectedLayout>
     );
   }
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <AnimatedBackground />
-        <div className="text-center">
-          <p>User not found</p>
-          <Button onClick={() => router.push("/dashboard")} className="mt-4">
-            Back to Dashboard
-          </Button>
+      <ProtectedLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <AnimatedBackground />
+          <div className="text-center">
+            <p>User not found</p>
+            <Button onClick={() => router.push("/dashboard")} className="mt-4">
+              Back to Dashboard
+            </Button>
+          </div>
         </div>
-      </div>
+      </ProtectedLayout>
     );
   }
 
   const fullName = `${user.fullname}`;
 
   return (
-    <div className="min-h-screen bg-background">
-      <AnimatedBackground />
-      <div className="max-w-4xl mx-auto p-6">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.push("/dashboard")}
-            className="h-10 w-10"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold">Profile Settings</h1>
-            <p className="text-muted-foreground">
-              Manage your account settings and preferences
-            </p>
+    <ProtectedLayout>
+      <div className="min-h-screen bg-background">
+        <AnimatedBackground />
+        <div className="max-w-4xl mx-auto p-6">
+          {/* Header */}
+          <div className="flex items-center gap-4 mb-8">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.push("/dashboard")}
+              className="h-10 w-10"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold">Profile Settings</h1>
+              <p className="text-muted-foreground">
+                Manage your account settings and preferences
+              </p>
+            </div>
           </div>
-        </div>
 
-        <div className="space-y-8">
-          {/* Profile Picture Section */}
-          <div className="text-center">
-            <h2 className="text-xl font-semibold mb-6">Profile Picture</h2>
+          <div className="space-y-8">
+            {/* Profile Picture Section */}
+            <div className="text-center">
+              <h2 className="text-xl font-semibold mb-6">Profile Picture</h2>
 
-            <ProfilePictureUpload
-              currentImage={getProfileImage()}
-              onImageChange={handleProfileImageChange}
-              userName={getUserName()}
+              <ProfilePictureUpload
+                currentImage={getProfileImage()}
+                onImageChange={handleProfileImageChange}
+                userName={getUserName()}
+              />
+            </div>
+
+            <Separator />
+
+            {/* Personal Information Form */}
+            <PersonalInfoForm
+              initialData={{
+                fullname: user.fullname,
+                email: user.email,
+              }}
+              onSubmit={handlePersonalInfoSubmit}
+              isLoading={isUpdatingProfile}
+            />
+
+            <Separator />
+
+            {/* Security Form */}
+            <SecurityForm
+              onSubmit={handlePasswordSubmit}
+              isLoading={isUpdatingPassword}
             />
           </div>
-
-          <Separator />
-
-          {/* Personal Information Form */}
-          <PersonalInfoForm
-            initialData={{
-              fullname: user.fullname,
-              email: user.email,
-            }}
-            onSubmit={handlePersonalInfoSubmit}
-            isLoading={isUpdatingProfile}
-          />
-
-          <Separator />
-
-          {/* Security Form */}
-          <SecurityForm
-            onSubmit={handlePasswordSubmit}
-            isLoading={isUpdatingPassword}
-          />
         </div>
       </div>
-    </div>
+    </ProtectedLayout>
   );
 }
