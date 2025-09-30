@@ -3,7 +3,7 @@ export const API_CONFIG = {
   RAG_API: {
     BASE_URL: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:4000',
     ENDPOINTS: {
-      QUERY: '/query',
+      QUERY: '/chat/query',
       QUERY_STREAM: '/chat/query/stream', 
       HEALTH: '/chat/health_rag',
     },
@@ -45,7 +45,7 @@ export const API_CONFIG = {
       DASHBOARDDATA: '/admin/dashboard',
     }
   },
-  TIMEOUT: 30000, // 30 seconds
+  TIMEOUT: 60000, // 60 seconds
 } as const;
 
 export type ModelType = 'rag' | 'llm' | 'llm_demo';

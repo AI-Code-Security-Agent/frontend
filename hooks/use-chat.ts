@@ -96,22 +96,14 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
       try {
         const response = await apiService.sendMessage(content, modelType, {
           ...settings,
-          session_id:
-            modelType === "llm" || modelType === "llm_demo"
-              ? currentSessionId || undefined
-              : undefined,
-        });
+          session_id: currentSessionId || undefined,
+        }, [...messages, userMessage]);
 
-        // Update session ID for LLM
-        if (modelType === "llm" && response.sessionId) {
-          setCurrentSessionId(response.sessionId);
-          Cookies.set("sessionId", response.sessionId, { expires: 1 });
-        }
-
-        if (modelType === "llm_demo" && response.sessionId) {
-          setCurrentSessionId(response.sessionId);
-          Cookies.set("demo_sessionId", response.sessionId, { expires: 30 });
-        }
+        if (response.sessionId) {
+        setCurrentSessionId(response.sessionId);
+        const cookieKey = modelType === "llm_demo" ? "demo_sessionId" : "sessionId";
+        Cookies.set(cookieKey, response.sessionId, { expires: modelType === "llm_demo" ? 30 : 1 });
+      }
 
         setMessageCount(response.messageCount ?? 0);
 
@@ -137,24 +129,16 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
         }
         
         // Clear loading message
-        setMessages((prev) =>
-          prev.filter((msg) => msg.id !== loadingMessage.id)
-        );
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "An unexpected error occurred";
-        setError(errorMessage);
-        options.onError?.(errorMessage);
-
-        // Remove loading message on error
-        setMessages((prev) =>
-          prev.filter((msg) => msg.id !== loadingMessage.id)
-        );
-      } finally {
-        setIsLoading(false);
+        setMessages((prev) => prev.filter((m) => m.id !== loadingMessage.id));
+    } catch (err:any) {
+      const msg = err?.message || "An unexpected error occurred";
+      setError(msg); options.onError?.(msg);
+      setMessages((prev) => prev.filter((m) => m.id !== loadingMessage.id));
+    } finally {
+      setIsLoading(false);
       }
     },
-    [currentSessionId, options]
+    [currentSessionId, messages, options]
   );
 
   const fetchSessions = async () => {

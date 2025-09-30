@@ -22,6 +22,21 @@ import Cookies from "js-cookie";
 
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
+function toTurns(history: import('@/types/types').ChatMessage[]): {role:'user'|'assistant', content:string}[] {
+  return history
+    .filter(m => m.role === 'user' || m.role === 'assistant')
+    .map(m => ({ role: m.role, content: m.content }));
+}
+
+export interface RAGChatPayload {
+  question: string;
+  k?: number;
+  relevance_threshold?: number;
+  code_focused?: boolean;
+  session_id?: string;
+  messages?: { role:'user'|'assistant'; content:string }[];
+}
+
 class UnifiedApiService {
   private ragBaseUrl: string;
   private llmBaseUrl: string;
@@ -64,6 +79,8 @@ class UnifiedApiService {
       throw error;
     }
   }
+
+  
 
   // ================================
   // TITLE GENERATION METHODS - ADD THESE
@@ -163,34 +180,28 @@ class UnifiedApiService {
 
   // Non-Streaming Methods -Chat
 
-  async ragQuery(request: QueryRequest): Promise<QueryResponse> {
-    try {
-      const response = await this.fetchWithTimeout(
-        `${this.ragBaseUrl}${API_CONFIG.RAG_API.ENDPOINTS.QUERY}`,
-        {
-          method: "POST",
-          body: JSON.stringify(request),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData: ApiError = await response.json().catch(() => ({
-          detail: `HTTP ${response.status}: ${response.statusText}`,
-        }));
-        throw new Error(errorData.detail || "RAG query failed");
-      }
-
-      return await response.json();
-    } catch (error) {
-      if (error instanceof Error) {
-        if (error.name === "AbortError") {
-          throw new Error("RAG request timed out. Please try again.");
-        }
-        throw error;
-      }
-      throw new Error("An unexpected error occurred with RAG API");
+ async ragQuery(request: RAGChatPayload): Promise<{
+  response: string;
+  sources: any[];
+  session_id: string;
+  message_count: number;
+  message_id: string;
+}> {
+  try {
+    const response = await fetchWithAuth(
+      `${this.ragBaseUrl}${API_CONFIG.RAG_API.ENDPOINTS.QUERY}`,
+      { method: "POST", body: JSON.stringify(request) }
+    );
+    if (!response.ok) {
+      const err = await response.json().catch(()=>({detail:`HTTP ${response.status}`}));
+      throw new Error(err.detail || 'RAG query failed');
     }
+    return await response.json();
+  } catch (e:any) {
+    if (e.name === "AbortError") throw new Error("RAG request timed out. Please try again.");
+    throw e;
   }
+}
 
   async llmChat(request: LLMChatRequest): Promise<LLMChatResponse> {
     try {
@@ -245,35 +256,29 @@ class UnifiedApiService {
   }
 
   async sendMessage(
-    message: string,
-    modelType: ModelType,
-    options: {
-      // RAG options
-      k?: number;
-      relevance_threshold?: number;
-      // LLM options
-      session_id?: string;
-      max_tokens?: number;
-      temperature?: number;
-    } = {}
-  ): Promise<{
-    content: string;
-    sources?: any[];
-    sessionId?: string;
-    messageCount?: number;
-    messageId?:string;
-  }> {
-    if (modelType === "rag") {
-      const response = await this.ragQuery({
-        question: message,
-        k: options.k,
-        relevance_threshold: options.relevance_threshold,
-      });
-      return {
-        content: response.answer,
-        sources: response.sources,
-      };
-    } else if (modelType === "llm") {
+  message: string,
+  modelType: ModelType,
+  options: {
+    k?: number; relevance_threshold?: number;
+    session_id?: string; max_tokens?: number; temperature?: number;
+  } = {},
+  currentMessages?: import('@/types/types').ChatMessage[] // <— pass from hook
+): Promise<{ content: string; sources?: any[]; sessionId?: string; messageCount?: number; messageId?: string; }> {
+  if (modelType === "rag") {
+    const resp = await this.ragQuery({
+      question: message,
+      k: options.k, relevance_threshold: options.relevance_threshold,
+      session_id: options.session_id,
+      messages: currentMessages ? toTurns(currentMessages) : []
+    });
+    return {
+      content: resp.response,
+      sources: resp.sources,
+      sessionId: resp.session_id,
+      messageCount: resp.message_count,
+      messageId: resp.message_id
+    };
+  } else if (modelType === "llm") {
       const response = await this.llmChat({
         message,
         session_id: options.session_id,

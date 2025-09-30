@@ -6,9 +6,14 @@ export interface UserTypes {
   gitAccessToken?: string;
 }
 
+export interface ChatTurn {
+  role: 'user' | 'assistant';
+  content: string;
+}
 
 export interface QueryRequest {
   question: string;
+  session_id?: string;
   k?: number;
   relevance_threshold?: number;
   code_focused?: boolean;
@@ -115,4 +120,3 @@ export interface AdminDashboardContent {
   totalDislikes: number;
   adminData: AdminUser[];
 }
-
