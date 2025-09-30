@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Inter, Montserrat } from 'next/font/google';
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
+import { AuthProvider } from '@/components/auth/auth-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 const montserrat = Montserrat({ 
@@ -29,9 +30,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <main className="relative">
-            {children}
-          </main>
+          <AuthProvider>
+            <main className="relative">
+              {children}
+            </main>
+          </AuthProvider>
         </ThemeProvider>
         <Toaster richColors position="top-right" />
       </body>

@@ -23,10 +23,6 @@ export const CosmicLayout: React.FC<CosmicLayoutProps> = ({
         <header className="fixed top-4 left-4 right-4 z-50 mx-auto max-w-6xl">
           <div className="bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl shadow-black/10 dark:shadow-black/30">
             <div className="flex h-14 items-center justify-between px-6 sm:px-8 lg:px-10">
-              {/* <div className="flex items-center space-x-2">
-                <Code className="h-6 w-6 text-primary" />
-                <span className="font-bold text-gray-900 dark:text-white">CodeGuardian</span>
-              </div> */}
               <Link
                   href="/"
                   className="flex items-center space-x-2 hover:opacity-80 transition-opacity"

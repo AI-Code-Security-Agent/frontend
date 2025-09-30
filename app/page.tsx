@@ -16,44 +16,7 @@ export default function Home() {
     <div className="min-h-screen min-w-full bg-background relative overflow-hidden">
       <CosmicLayout>
         <AnimatedBackground />
-
-        {/* Content overlay */}
         <div className="relative z-10">
-          <header className="fixed top-4 left-4 right-4 z-50 mx-auto max-w-6xl">
-            <div className="bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl shadow-black/10 dark:shadow-black/30">
-              <div className="flex h-14 items-center justify-between px-6 sm:px-8 lg:px-10">
-                <Link
-                  href="/"
-                  className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
-                >
-                  <ProjectLogo size="md" clickable={false} />
-                  <span className="font-bold text-gray-900 dark:text-white">
-                    CodeGuardian
-                  </span>
-                </Link>
-                <div className="flex items-center space-x-4">
-                  <Link href="/login">
-                    <Button
-                      variant="ghost"
-                      className="hover:bg-white/10 dark:hover:bg-white/5"
-                    >
-                      Login
-                    </Button>
-                  </Link>
-                  <Link href="/signup">
-                    <Button
-                      variant="ghost"
-                      className="bg-white/20 dark:bg-white/10 hover:bg-white/30 dark:hover:bg-white/20 border border-white/30 dark:border-white/20 backdrop-blur-sm"
-                    >
-                      Sign Up
-                    </Button>
-                  </Link>
-                  <ThemeToggle />
-                </div>
-              </div>
-            </div>
-          </header>
-
           <main className="flex min-h-screen flex-col items-center justify-center gap-6 pb-8 pt-6 md:py-10">
             <div className="flex max-w-[980px] flex-col items-center gap-2 px-4 text-center">
               <h1 className="gradient-text text-3xl sm:text-5xl md:text-6xl font-semibold leading-tight">
@@ -87,14 +50,6 @@ export default function Home() {
                 </Button>
               </Link>
             </div>
-
-            {/* Chat section - hidden initially, visible after clicking demo */}
-            {/* {showChat && (
-              <div className="w-full max-w-5xl mt-8 px-4 flex justify-center">
-                <ChatSessionDemo onClose={() => setShowChat(false)} />
-              </div>
-            )} */}
-
             {/* 3-feature grid section moves below chat section */}
             <div className="mt-16 grid gap-8 px-4 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl w-full">
               <div className="relative overflow-hidden rounded-lg border border-white/10 dark:border-white/5 bg-white/5 dark:bg-black/20 backdrop-blur-xl p-2">
