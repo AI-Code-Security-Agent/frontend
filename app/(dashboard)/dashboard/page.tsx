@@ -368,26 +368,28 @@ export default function DashboardPage() {
 
               <Separator className="my-4" />
 
-            {/* UPDATED: Chat history with regenerate title functionality */}
-            <div className="mt-4 space-y-2">
-              <h2 className="text-sm font-semibold px-2">Chat History</h2>
-              <div className="space-y-1 max-h-[350px] overflow-y-auto pr-1 scrollbar-hide relative">
-                {sessions.map((session) => (
-                  <div
-                    key={session._id}
-                    className="group relative flex items-center w-full"
-                  >
-                    <Button
-                      variant="ghost"
-                      className={`flex-1 justify-start text-xs truncate pr-16 ${
-                        session._id === currentSessionId ? "bg-muted" : ""
-                      }`}
-                      onClick={() => handleSessionClick(session._id)}
-                      title={session.title || "Untitled Session"}
+              {/* UPDATED: Chat history with regenerate title functionality */}
+              <div className="mt-4 space-y-2">
+                <h2 className="text-sm font-semibold px-2">Chat History</h2>
+                <div className="space-y-1 max-h-[350px] overflow-y-auto pr-1 scrollbar-hide relative">
+                  {sessions.map((session) => (
+                    <div
+                      key={session._id}
+                      className="group relative flex items-center w-full"
                     >
-                      {/* <MessageSquarePlus className="mr-2 h-4 w-4 flex-shrink-0" /> */}
-                      <span className="truncate">{session.title || "Untitled Session"}</span>
-                    </Button>
+                      <Button
+                        variant="ghost"
+                        className={`flex-1 justify-start text-xs truncate pr-16 ${
+                          session._id === currentSessionId ? "bg-muted" : ""
+                        }`}
+                        onClick={() => handleSessionClick(session._id)}
+                        title={session.title || "Untitled Session"}
+                      >
+                        {/* <MessageSquarePlus className="mr-2 h-4 w-4 flex-shrink-0" /> */}
+                        <span className="truncate">
+                          {session.title || "Untitled Session"}
+                        </span>
+                      </Button>
 
                       {/* UPDATED: Action buttons - shown on hover */}
                       <div className="absolute right-2 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -555,147 +557,148 @@ export default function DashboardPage() {
             </ScrollArea>
           </div>
 
-        {/* Input Area - Fixed at bottom */}
-        <div className="bg-background">
-          <div className="max-w-4xl mx-auto p-4">
-            <form onSubmit={handleSubmit} className="relative">
-              <div className="flex flex-col bg-background border rounded-3xl shadow-sm hover:shadow-md transition-shadow">
-                {/* Input Textarea */}
-                <Textarea
-                  ref={textareaRef}
-                  placeholder={
-                    !isCurrentModelConnected
-                      ? `${selectedModel.toUpperCase()} API not connected...`
-                      : isLoading
-                      ? "Waiting for response..."
-                      : `Message ${modelLabel}...`
-                  }
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  className="min-h-[52px] max-h-[120px] p-3 border-0 resize-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent"
-                  disabled={isLoading || !isCurrentModelConnected}
-                  // maxLength={1000}
-                  style={{
-                    scrollbarWidth: "thin",
-                    scrollbarColor: "rgba(155, 155, 155, 0.5) transparent",
-                  }}
-                />
-                {/* Buttons Row */}
-                <div className="flex justify-between items-center p-2">
-                  {/* Left-Aligned Model Selector */}
-                  <div className="flex items-center space-x-2">
-                    <DropdownMenu
-                      open={isModelDropdownOpen}
-                      onOpenChange={setIsModelDropdownOpen}
-                    >
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 px-4 text-xs font-medium hover:bg-muted/50 rounded-full"
-                          disabled={isLoading}
-                        >
-                          <ModelIcon className="h-3 w-3 mr-2" />
-                          <span>{modelLabel}</span>
-                          <ChevronDown className="h-3 w-3 ml-1" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start" className="w-56">
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelectedModel("rag");
-                            setIsModelDropdownOpen(false);
-                          }}
-                          disabled={!ragConnected}
-                          className="flex items-center justify-between"
-                        >
-                          <div className="flex items-center">
-                            <Database className="h-4 w-4 mr-2" />
-                            <div>
-                              <div className="font-medium">RAG</div>
-                              <div className="text-xs text-muted-foreground">
-                                Knowledge Base Search
-                              </div>
-                            </div>
-                          </div>
-                          <div
-                            className={`w-2 h-2 rounded-full ${
-                              ragConnected ? "bg-green-500" : "bg-red-500"
-                            }`}
-                          />
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelectedModel("llm");
-                            setIsModelDropdownOpen(false);
-                          }}
-                          disabled={!llmConnected}
-                          className="flex items-center justify-between"
-                        >
-                          <div className="flex items-center">
-                            <Brain className="h-4 w-4 mr-2" />
-                            <div>
-                              <div className="font-medium">LLM</div>
-                              <div className="text-xs text-muted-foreground">
-                                Conversational AI
-                              </div>
-                            </div>
-                          </div>
-                          <div
-                            className={`w-2 h-2 rounded-full ${
-                              llmConnected ? "bg-green-500" : "bg-red-500"
-                            }`}
-                          />
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                  {/* Right-Aligned Action Buttons */}
-                  <div className="flex items-center space-x-2">
-                    {messages.length > 0 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={clearChat}
-                        disabled={isLoading}
-                        size="sm"
-                        className="h-8 w-8 p-0 hover:bg-muted/50"
-                        title="Clear Chat"
+          {/* Input Area - Fixed at bottom */}
+          <div className="bg-background">
+            <div className="max-w-4xl mx-auto p-4">
+              <form onSubmit={handleSubmit} className="relative">
+                <div className="flex flex-col bg-background border rounded-3xl shadow-sm hover:shadow-md transition-shadow">
+                  {/* Input Textarea */}
+                  <Textarea
+                    ref={textareaRef}
+                    placeholder={
+                      !isCurrentModelConnected
+                        ? `${selectedModel.toUpperCase()} API not connected...`
+                        : isLoading
+                        ? "Waiting for response..."
+                        : `Message ${modelLabel}...`
+                    }
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    className="min-h-[52px] max-h-[120px] p-3 border-0 resize-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent"
+                    disabled={isLoading || !isCurrentModelConnected}
+                    // maxLength={1000}
+                    style={{
+                      scrollbarWidth: "thin",
+                      scrollbarColor: "rgba(155, 155, 155, 0.5) transparent",
+                    }}
+                  />
+                  {/* Buttons Row */}
+                  <div className="flex justify-between items-center p-2">
+                    {/* Left-Aligned Model Selector */}
+                    <div className="flex items-center space-x-2">
+                      <DropdownMenu
+                        open={isModelDropdownOpen}
+                        onOpenChange={setIsModelDropdownOpen}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-4 text-xs font-medium hover:bg-muted/50 rounded-full"
+                            disabled={isLoading}
+                          >
+                            <ModelIcon className="h-3 w-3 mr-2" />
+                            <span>{modelLabel}</span>
+                            <ChevronDown className="h-3 w-3 ml-1" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="w-56">
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedModel("rag");
+                              setIsModelDropdownOpen(false);
+                            }}
+                            disabled={!ragConnected}
+                            className="flex items-center justify-between"
+                          >
+                            <div className="flex items-center">
+                              <Database className="h-4 w-4 mr-2" />
+                              <div>
+                                <div className="font-medium">RAG</div>
+                                <div className="text-xs text-muted-foreground">
+                                  Knowledge Base Search
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              className={`w-2 h-2 rounded-full ${
+                                ragConnected ? "bg-green-500" : "bg-red-500"
+                              }`}
+                            />
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedModel("llm");
+                              setIsModelDropdownOpen(false);
+                            }}
+                            disabled={!llmConnected}
+                            className="flex items-center justify-between"
+                          >
+                            <div className="flex items-center">
+                              <Brain className="h-4 w-4 mr-2" />
+                              <div>
+                                <div className="font-medium">LLM</div>
+                                <div className="text-xs text-muted-foreground">
+                                  Conversational AI
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              className={`w-2 h-2 rounded-full ${
+                                llmConnected ? "bg-green-500" : "bg-red-500"
+                              }`}
+                            />
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                    {/* Right-Aligned Action Buttons */}
+                    <div className="flex items-center space-x-2">
+                      {messages.length > 0 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={clearChat}
+                          disabled={isLoading}
+                          size="sm"
+                          className="h-8 w-8 p-0 hover:bg-muted/50"
+                          title="Clear Chat"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button
+                        type="submit"
+                        disabled={
+                          isLoading || !isCurrentModelConnected || !input.trim()
+                        }
+                        size="sm"
+                        className="h-8 w-8 p-0 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
+                        title="Send Message"
+                      >
+                        <Send className="h-4 w-4" />
                       </Button>
-                    )}
-                    <Button
-                      type="submit"
-                      disabled={
-                        isLoading || !isCurrentModelConnected || !input.trim()
-                      }
-                      size="sm"
-                      className="h-8 w-8 p-0 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
-                      title="Send Message"
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </form>
+              </form>
 
-            {/* Footer Info */}
-            <div className="flex flex-wrap justify-center items-center mt-3 text-xs text-muted-foreground gap-2 text-center">
-              <span>Press Enter to send, Shift+Enter for new line</span>
-              <span>•</span>
-              {/* <span>{input.length}/1000</span> */}
-              <span>•</span>
-              <span className="flex items-center justify-center">
-                <ModelIcon className="h-3 w-3 mr-1" />
-                {modelDescription}
-              </span>
+              {/* Footer Info */}
+              <div className="flex flex-wrap justify-center items-center mt-3 text-xs text-muted-foreground gap-2 text-center">
+                <span>Press Enter to send, Shift+Enter for new line</span>
+                <span>•</span>
+                {/* <span>{input.length}/1000</span> */}
+                <span>•</span>
+                <span className="flex items-center justify-center">
+                  <ModelIcon className="h-3 w-3 mr-1" />
+                  {modelDescription}
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </ProtectedLayout>
   );
 }
