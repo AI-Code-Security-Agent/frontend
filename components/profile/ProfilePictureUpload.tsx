@@ -126,7 +126,7 @@ export function ProfilePictureUpload({
               Upload Picture
             </Button>
             
-            {displayImage && (
+            {/* {displayImage && (
               <Button
                 type="button"
                 variant="outline"
@@ -136,7 +136,7 @@ export function ProfilePictureUpload({
                 <X className="h-4 w-4 mr-1" />
                 Remove
               </Button>
-            )}
+            )} */}
           </div>
         </CardContent>
       </Card>

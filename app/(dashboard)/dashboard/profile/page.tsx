@@ -32,7 +32,11 @@ export default function ProfilePage() {
   const [selectedProfileImage, setSelectedProfileImage] = useState<File | null>(
     null
   );
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const {
+    isAuthenticated,
+    isLoading: authLoading,
+  } = useAuth();
+
   const fetchProfile = async () => {
     try {
       const result = await apiService.getProfileData();
@@ -73,11 +77,20 @@ export default function ProfilePage() {
       if (!result.isSuccess) {
         throw new Error("Failed to update profile");
       }
-      console.log("Profile update response:", result);
-      setUser((prev) => (prev ? { ...prev, ...data } : null));
-      // Update username cookie if changed
-      const fullName = `${data.fullname}`;
-      Cookies.set("userName", fullName, { expires: 1 });
+
+      // console.log("Profile update response:", result);
+
+      setUser((prev) => {
+        if (prev) {
+          const updatedUser = {
+            ...prev,
+            ...data,
+          };
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+          return updatedUser;
+        }
+        return null;
+      });
     } catch (error) {
       console.error("Error updating profile:", error);
       throw error;
@@ -146,7 +159,7 @@ export default function ProfilePage() {
         const reader = new FileReader();
         reader.onloadend = async () => {
           const base64String = reader.result as string;
-          console.log("Base64 String:", base64String);
+          // console.log("Base64 String:", base64String);
           const token = Cookies.get("accessToken");
 
           const response = await fetch(
@@ -166,9 +179,17 @@ export default function ProfilePage() {
           }
 
           const result = await response.json();
-          setUser((prev) =>
-            prev ? { ...prev, profilePicture: result.profilePicture } : null
-          );
+          setUser((prev) => {
+            if (prev) {
+              const updatedUser = {
+                ...prev,
+                profilePicture: result.content.profilePicture,
+              };
+              localStorage.setItem("user", JSON.stringify(updatedUser));
+              return updatedUser;
+            }
+            return null;
+          });
           toast.success("Profile picture updated successfully");
         };
 

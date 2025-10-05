@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,21 +24,49 @@ import { toast } from "sonner";
 import Cookies from "js-cookie";
 import { mockRootProps } from "@/lib/mock-data/profilePageMockData";
 import Image from "next/image";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
-interface UserMenuProps {
-  userName: string;
-  isClient: boolean;
-  onLogout: () => Promise<void>;
+interface User {
+  _id: string;
+  fullname: string;
+  email: string;
+  role: string;
+  profilePicture?: string;
 }
 
-export function UserMenu({ userName, isClient, onLogout }: UserMenuProps) {
+interface UserMenuProps {
+  onLogout: () => Promise<void>;
+  user: User | null;
+}
+
+export function UserMenu({
+  onLogout,
+  user,
+}: UserMenuProps) {
   const router = useRouter();
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const userName = user?.fullname || "User";
+  const [userImage, setUserImage] = useState<string>(
+    mockRootProps.user.profilePicture
+  );
+    const [userInitials, setUserInitials] = useState<string>("");
 
   const handleProfileClick = () => {
     router.push("/dashboard/profile");
   };
+
+ useEffect(() => {
+    const img = user?.profilePicture || mockRootProps.user.profilePicture;
+    setUserImage(img);
+
+    const initials = (user?.fullname || "User")
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
+    setUserInitials(initials);
+  }, [user]);
 
   const handleLogoutConfirm = async () => {
     setIsLoggingOut(true);
@@ -52,22 +80,21 @@ export function UserMenu({ userName, isClient, onLogout }: UserMenuProps) {
     }
   };
 
-  const getProfileImage = () => {
-    return mockRootProps.user.profilePicture;
-  };
-
   return (
     <div className="flex items-center justify-between">
-      <div className="flex items-center cursor-pointer" onClick={() => router.push("/dashboard/profile")}>
-        <Image
-          src={getProfileImage()}
-          alt="Profile"
-          width={32}
-          height={32}
-          className="rounded-full"
-        />
+      <div
+        className="flex items-center cursor-pointer"
+        onClick={() => router.push("/dashboard/profile")}
+      >
+         {/* ✅ Avatar replaces manual Image code */}
+        <Avatar className="h-8 w-8">
+          <AvatarImage src={userImage} alt={userName} />
+          <AvatarFallback className="text-xs font-semibold">
+            {userInitials}
+          </AvatarFallback>
+        </Avatar>
         <span className="ml-2 text-sm font-medium">
-          {isClient ? userName : "User"}
+          {userName? userName : "User"}
         </span>
       </div>
 

@@ -6,13 +6,17 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 interface User {
-  username: string;
-  email?: string;
+  _id: string;
+  fullname: string;
+  email: string;
+  role: string;
+  profilePicture?: string;
 }
 
 interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   isLoading: boolean;
@@ -33,30 +37,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // ✅ Check cookies or Google callback on mount
   useEffect(() => {
     const token = Cookies.get("accessToken");
-    const username = Cookies.get("userName");
+    const storedUser = localStorage.getItem("user");
 
-    const googleToken = searchParams.get("accessToken") || searchParams.get("token");
+    if (token) {
+      try {
+        setIsAuthenticated(true);
+      } catch {
+        setIsAuthenticated(false);
+      }
+    }
+
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch {
+        setUser(null);
+      }
+    }
+
+    const googleToken =
+      searchParams.get("accessToken") || searchParams.get("token");
     const googleUser = searchParams.get("username");
 
     if (googleToken) {
       Cookies.set("accessToken", googleToken, { expires: 1 });
       if (googleUser) Cookies.set("userName", googleUser, { expires: 1 });
       setIsAuthenticated(true);
-      setUser({ username: googleUser || "Google User" });
+      // still optional: you could setUser for googleUser
       toast.success("Signed in with Google");
       router.push("/dashboard");
       return;
     }
-
-    if (token && username) {
-      setIsAuthenticated(true);
-      setUser({ username });
-    }
-
     setIsLoading(false);
   }, [searchParams, router]);
 
-  // ✅ Normal login
+  //  Normal login
   const signIn = async (email: string, password: string) => {
     setIsLoading(true);
     try {
@@ -67,11 +82,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       const result = await response.json();
+
       if (result.isSuccess) {
         Cookies.set("accessToken", result.accessToken, { expires: 1 });
-        Cookies.set("userName", result.username, { expires: 1 });
+
+        //  Pick only safe fields
+        const safeUser: User = {
+          _id: result.user._id,
+          fullname: result.user.fullname,
+          email: result.user.email,
+          role: result.user.role,
+          profilePicture: result.user.profilePicture,
+        };
+        // console.log('safe user :',safeUser)
+        //Save user object in cookie
+        localStorage.setItem("user", JSON.stringify(safeUser));
+
         setIsAuthenticated(true);
-        setUser({ username: result.username });
+        setUser(safeUser);
+
         toast.success(result.message);
         router.push("/dashboard");
       } else {
@@ -85,7 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // ✅ API logout (replaces old signOut)
+  // ✅ API logout
   const signOut = async () => {
     const token = Cookies.get("accessToken");
     if (!token) {
@@ -105,12 +134,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       const data = await response.json();
+
       if (data.isSuccess) {
         Cookies.remove("accessToken");
-        Cookies.remove("userName");
         Cookies.remove("sessionId");
+        localStorage.removeItem("user");
+
         setIsAuthenticated(false);
         setUser(null);
+
         router.push("/");
         toast.success(data.message || "Logged out successfully");
       } else {
@@ -123,7 +155,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, signIn, signOut, isLoading }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, user, setUser, signIn, signOut, isLoading }}
+    >
       {children}
     </AuthContext.Provider>
   );

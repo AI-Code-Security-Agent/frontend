@@ -159,6 +159,9 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
 
         const { session_messages, totalMessages } = response;
 
+        console.log('loaded session messages :',session_messages)
+        console.log('total messages :',totalMessages)
+
         const loadedMessages: ChatMessage[] = session_messages.map((msg: any) => ({
           id: msg._id,
           role: msg.role,

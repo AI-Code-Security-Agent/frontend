@@ -41,7 +41,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Session } from "@/types/types";
 import { AnimatedBackground } from "@/components/animated-background";
 import ProtectedLayout from "@/components/auth/protected-layout";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -72,11 +71,15 @@ export default function DashboardPage() {
   const [showSettings, setShowSettings] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
-  const [userName, setUserName] = useState<string>("User");
-  const [isClient, setIsClient] = useState(false);
 
-  const { isAuthenticated, isLoading: authLoading, signOut } = useAuth();
+  const {
+    isAuthenticated,
+    isLoading: authLoading,
+    signOut,
+    user: authUser,
+  } = useAuth();
 
+ 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
       fetchSessions();
@@ -88,19 +91,12 @@ export default function DashboardPage() {
     if (cookieSessionId && !currentSessionId) {
       loadSessionMessages(cookieSessionId, "main");
     }
-  }, [loadSessionMessages, currentSessionId]);
 
-  // Handle client-side hydration for username
-  useEffect(() => {
-    setIsClient(true);
-    const cookieUserName = Cookies.get("userName");
-    if (cookieUserName) {
-      setUserName(cookieUserName);
-    }
-  }, []);
+  }, [loadSessionMessages, currentSessionId]);
 
   // Handle session click
   const handleSessionClick = (sessionId: string) => {
+    console.log('clicked with ses id :',sessionId)
     Cookies.set("sessionId", sessionId);
     loadSessionMessages(sessionId, "main");
   };
@@ -265,6 +261,7 @@ export default function DashboardPage() {
   const modelLabel = selectedModel === "rag" ? "RAG" : "LLM";
   const modelDescription =
     selectedModel === "rag" ? "Knowledge Base" : "Conversational AI";
+
 
   return (
     <ProtectedLayout>
@@ -431,9 +428,8 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <UserMenu
-                    userName={userName}
-                    isClient={isClient}
                     onLogout={handleLogout}
+                    user={authUser}
                   />
                 </div>
                 {sidebarVisible && (
