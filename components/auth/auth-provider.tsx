@@ -34,19 +34,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // ✅ Check cookies or Google callback on mount
   useEffect(() => {
+
     const token = Cookies.get("accessToken");
     const storedUser = localStorage.getItem("user");
 
-    if (token) {
-      try {
-        setIsAuthenticated(true);
-      } catch {
-        setIsAuthenticated(false);
-      }
-    }
-
+    if (token) setIsAuthenticated(true);
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
@@ -55,21 +48,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    const googleToken =
-      searchParams.get("accessToken") || searchParams.get("token");
-    const googleUser = searchParams.get("username");
+    const googleToken = searchParams.get("accessToken");
 
-    if (googleToken) {
+    const fetchGoogleUser = async () => {
+      if (!googleToken) return;
+
       Cookies.set("accessToken", googleToken, { expires: 1 });
-      if (googleUser) Cookies.set("userName", googleUser, { expires: 1 });
-      setIsAuthenticated(true);
-      // still optional: you could setUser for googleUser
-      toast.success("Signed in with Google");
-      router.push("/dashboard");
-      return;
-    }
+
+      try {
+        const res = await fetch(`${baseURL}/auth/auth-user`, {
+          headers: { Authorization: `Bearer ${googleToken}` },
+        });
+        const data = await res.json();
+
+        if (data.isSuccess) {
+          localStorage.setItem("user", JSON.stringify(data.content.user));
+          setUser(data.content.user);
+          setIsAuthenticated(true);
+          toast.success("Signed in with Google");
+
+          // ✅ Clean up URL (remove query params)
+          const cleanUrl = window.location.origin + "/dashboard";
+          window.history.replaceState({}, document.title, cleanUrl);
+
+          router.push("/dashboard");
+        } else {
+          toast.error("Failed to get user data");
+        }
+      } catch (err) {
+        console.error("Fetch Google user error:", err);
+        toast.error("An error occurred during Google login");
+      }
+       console.log('google login process complete');
+    };
+
+    fetchGoogleUser();
+   
     setIsLoading(false);
-  }, [searchParams, router]);
+  }, []); // ✅ Run only once on mount
 
   //  Normal login
   const signIn = async (email: string, password: string) => {
