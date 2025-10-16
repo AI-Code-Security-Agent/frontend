@@ -28,14 +28,19 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
     setError(null);
   }, []);
 
+  const fetchSessions = useCallback(async () => {
+    const sessions = await apiService.fetchSessions();
+    setSessions(sessions);
+  }, []);
+
   // Add the regenerate title function
   const regenerateTitle = useCallback(async (sessionId: string) => {
     try {
       const result = await apiService.regenerateTitle(sessionId);
-      
+
       if (result.isSuccess && result.content) {
         toast.success("Title regenerated successfully");
-        
+
         // Update the sessions list with new title
         setSessions((prev) =>
           prev.map((session) =>
@@ -44,7 +49,7 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
               : session
           )
         );
-        
+
         return result.content.title;
       } else {
         toast.error(result.message || "Failed to regenerate title");
@@ -94,16 +99,24 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
       setError(null);
 
       try {
-        const response = await apiService.sendMessage(content, modelType, {
-          ...settings,
-          session_id: currentSessionId || undefined,
-        }, [...messages, userMessage]);
+        const response = await apiService.sendMessage(
+          content,
+          modelType,
+          {
+            ...settings,
+            session_id: currentSessionId || undefined,
+          },
+          [...messages, userMessage]
+        );
 
         if (response.sessionId) {
-        setCurrentSessionId(response.sessionId);
-        const cookieKey = modelType === "llm_demo" ? "demo_sessionId" : "sessionId";
-        Cookies.set(cookieKey, response.sessionId, { expires: modelType === "llm_demo" ? 30 : 1 });
-      }
+          setCurrentSessionId(response.sessionId);
+          const cookieKey =
+            modelType === "llm_demo" ? "demo_sessionId" : "sessionId";
+          Cookies.set(cookieKey, response.sessionId, {
+            expires: modelType === "llm_demo" ? 30 : 1,
+          });
+        }
 
         setMessageCount(response.messageCount ?? 0);
 
@@ -125,26 +138,120 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
         );
 
         if (modelType !== "llm_demo") {
-          fetchSessions(); // Refresh sessions after sending a message
+          fetchSessions();
         }
-        
+
         // Clear loading message
         setMessages((prev) => prev.filter((m) => m.id !== loadingMessage.id));
-    } catch (err:any) {
-      const msg = err?.message || "An unexpected error occurred";
-      setError(msg); options.onError?.(msg);
-      setMessages((prev) => prev.filter((m) => m.id !== loadingMessage.id));
-    } finally {
-      setIsLoading(false);
+      } catch (err: any) {
+        const msg = err?.message || "An unexpected error occurred";
+        setError(msg);
+        options.onError?.(msg);
+        setMessages((prev) => prev.filter((m) => m.id !== loadingMessage.id));
+      } finally {
+        setIsLoading(false);
       }
     },
     [currentSessionId, messages, options]
   );
 
-  const fetchSessions = async () => {
-    const sessions = await apiService.fetchSessions();
-    setSessions(sessions);
-  };
+  const editAndResendMessage = useCallback(
+    async (
+      messageId: string,
+      newContent: string,
+      settings: {
+        k?: number;
+        relevance_threshold?: number;
+        max_tokens?: number;
+        temperature?: number;
+      } = {}
+    ) => {
+      if (!newContent.trim()) return;
+
+      const originalIndex = messages.findIndex((m) => m.id === messageId);
+      if (originalIndex === -1) return;
+
+      const messagesBefore = messages.slice(0, originalIndex);
+      const editedMessage: ChatMessage = {
+        ...messages[originalIndex],
+        content: newContent.trim(),
+        timestamp: new Date(),
+      };
+
+      const updatedMessages = [...messagesBefore, editedMessage];
+
+      const loadingMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: "",
+        timestamp: new Date(),
+        isLoading: true,
+        modelType: editedMessage.modelType,
+        feedback: null,
+      };
+
+      setMessages([...updatedMessages, loadingMessage]);
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await apiService.editMessage(
+          messageId,  
+          newContent.trim(),
+          editedMessage.modelType,
+          {
+            ...settings,
+            session_id: currentSessionId || undefined,
+            max_tokens: settings.max_tokens || 1500,
+            temperature: settings.temperature || 0.7,
+          }
+        );
+
+        if (response.sessionId) {
+          setCurrentSessionId(response.sessionId);
+          const cookieKey =
+            editedMessage.modelType === "llm_demo"
+              ? "demo_sessionId"
+              : "sessionId";
+          Cookies.set(cookieKey, response.sessionId, {
+            expires: editedMessage.modelType === "llm_demo" ? 30 : 1,
+          });
+        }
+
+        setMessageCount(response.messageCount ?? 0);
+
+        const assistantMessage: ChatMessage = {
+          id: response.messageId || crypto.randomUUID(),
+          role: "assistant",
+          content: response.content,
+          sources: response.sources,
+          timestamp: new Date(),
+          modelType: editedMessage.modelType,
+          sessionId: response.sessionId,
+          feedback: null,
+        };
+
+        setMessages((prev) =>
+          prev.map((m) => (m.id === loadingMessage.id ? assistantMessage : m))
+        );
+
+        if (editedMessage.modelType !== "llm_demo") {
+          await fetchSessions();
+        }
+
+        // Clear loading message
+        setMessages((prev) => prev.filter((m) => m.id !== loadingMessage.id));
+      } catch (err: any) {
+        const msg = err?.message || "An unexpected error occurred";
+        setError(msg);
+        options.onError?.(msg);
+        setMessages((prev) => prev.filter((m) => m.id !== loadingMessage.id));
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [messages, currentSessionId, fetchSessions]
+  );
 
   const loadSessionMessages = useCallback(
     async (sessionId: string, mode: string) => {
@@ -162,15 +269,17 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
         // console.log('loaded session messages :',session_messages)
         // console.log('total messages :',totalMessages)
 
-        const loadedMessages: ChatMessage[] = session_messages.map((msg: any) => ({
-          id: msg._id,
-          role: msg.role,
-          content: msg.content,
-          timestamp: new Date(msg.timestamp),
-          modelType: msg.model || "llm",
-          sessionId: msg.session,
-          feedback: msg.feedback || null,
-        }));
+        const loadedMessages: ChatMessage[] = session_messages.map(
+          (msg: any) => ({
+            id: msg._id,
+            role: msg.role,
+            content: msg.content,
+            timestamp: new Date(msg.timestamp),
+            modelType: msg.model || "llm",
+            sessionId: msg.session,
+            feedback: msg.feedback || null,
+          })
+        );
 
         setMessages(loadedMessages);
         setCurrentSessionId(sessionId);
@@ -203,6 +312,7 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
     sessions,
     setSessions,
     messageCount,
-    regenerateTitle, // Add this to the return object
+    regenerateTitle,
+    editAndResendMessage,
   };
 }

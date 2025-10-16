@@ -12,6 +12,7 @@ export const API_CONFIG = {
     BASE_URL: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:4000',
     ENDPOINTS: {
       CHAT: '/chat/messages_llm',
+      EDIT_MESSAGE: '/chat/edit_message', 
       HEALTH: '/chat/health_llm',
       CHAT_STREAM: '/chat/stream',
       DEMO_CHAT_STREAM:'/chat/demo/stream',

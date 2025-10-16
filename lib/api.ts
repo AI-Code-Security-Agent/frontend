@@ -8,7 +8,7 @@ import {
   Session,
   ApiResponse,
   AdminUser,
-  AdminDashboardContent
+  AdminDashboardContent,
 } from "../types/types";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { ChatMessage, GetSessionMessagesResponse } from "@/types/types";
@@ -22,10 +22,12 @@ import Cookies from "js-cookie";
 
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
-function toTurns(history: import('@/types/types').ChatMessage[]): {role:'user'|'assistant', content:string}[] {
+function toTurns(
+  history: import("@/types/types").ChatMessage[]
+): { role: "user" | "assistant"; content: string }[] {
   return history
-    .filter(m => m.role === 'user' || m.role === 'assistant')
-    .map(m => ({ role: m.role, content: m.content }));
+    .filter((m) => m.role === "user" || m.role === "assistant")
+    .map((m) => ({ role: m.role, content: m.content }));
 }
 
 export interface RAGChatPayload {
@@ -34,7 +36,7 @@ export interface RAGChatPayload {
   relevance_threshold?: number;
   code_focused?: boolean;
   session_id?: string;
-  messages?: { role:'user'|'assistant'; content:string }[];
+  messages?: { role: "user" | "assistant"; content: string }[];
 }
 
 class UnifiedApiService {
@@ -48,8 +50,8 @@ class UnifiedApiService {
 
   // Helper method to get auth token
   private getAuthToken(): string | null {
-    if (typeof window !== 'undefined') {
-      return Cookies.get('accessToken') || null;
+    if (typeof window !== "undefined") {
+      return Cookies.get("accessToken") || null;
     }
     return null;
   }
@@ -80,19 +82,19 @@ class UnifiedApiService {
     }
   }
 
-  
-
   // ================================
   // TITLE GENERATION METHODS - ADD THESE
   // ================================
 
-  async regenerateTitle(sessionId: string): Promise<ApiResponse<{ title: string }>> {
+  async regenerateTitle(
+    sessionId: string
+  ): Promise<ApiResponse<{ title: string }>> {
     try {
       const token = this.getAuthToken();
       if (!token) {
         return {
           isSuccess: false,
-          message: 'Authentication required',
+          message: "Authentication required",
           content: null,
         };
       }
@@ -100,16 +102,16 @@ class UnifiedApiService {
       const response = await fetchWithAuth(
         `${this.llmBaseUrl}${API_CONFIG.SESSION_API.ENDPOINTS.REGENERATE_TITLE}/${sessionId}/regenerate-title`,
         {
-          method: 'POST',
+          method: "POST",
         }
       );
 
       const data = await response.json();
-      
+
       if (!response.ok) {
         return {
           isSuccess: false,
-          message: data.message || 'Failed to regenerate title',
+          message: data.message || "Failed to regenerate title",
           content: null,
         };
       }
@@ -122,19 +124,21 @@ class UnifiedApiService {
     } catch (error: any) {
       return {
         isSuccess: false,
-        message: error.message || 'Network error',
+        message: error.message || "Network error",
         content: null,
       };
     }
   }
 
-  async generateTitle(message: string): Promise<ApiResponse<{ title: string }>> {
+  async generateTitle(
+    message: string
+  ): Promise<ApiResponse<{ title: string }>> {
     try {
       const token = this.getAuthToken();
       if (!token) {
         return {
           isSuccess: false,
-          message: 'Authentication required',
+          message: "Authentication required",
           content: null,
         };
       }
@@ -142,7 +146,7 @@ class UnifiedApiService {
       const response = await fetchWithAuth(
         `${this.llmBaseUrl}${API_CONFIG.LLM_API.ENDPOINTS.GENERATE_TITLE}`,
         {
-          method: 'POST',
+          method: "POST",
           body: JSON.stringify({
             message,
             temperature: 0.3,
@@ -151,24 +155,24 @@ class UnifiedApiService {
       );
 
       const data = await response.json();
-      
+
       if (!response.ok) {
         return {
           isSuccess: false,
-          message: data.message || 'Failed to generate title',
+          message: data.message || "Failed to generate title",
           content: null,
         };
       }
 
       return {
         isSuccess: true,
-        message: 'Title generated successfully',
+        message: "Title generated successfully",
         content: { title: data.response },
       };
     } catch (error: any) {
       return {
         isSuccess: false,
-        message: error.message || 'Network error',
+        message: error.message || "Network error",
         content: null,
       };
     }
@@ -180,28 +184,31 @@ class UnifiedApiService {
 
   // Non-Streaming Methods -Chat
 
- async ragQuery(request: RAGChatPayload): Promise<{
-  response: string;
-  sources: any[];
-  session_id: string;
-  message_count: number;
-  message_id: string;
-}> {
-  try {
-    const response = await fetchWithAuth(
-      `${this.ragBaseUrl}${API_CONFIG.RAG_API.ENDPOINTS.QUERY}`,
-      { method: "POST", body: JSON.stringify(request) }
-    );
-    if (!response.ok) {
-      const err = await response.json().catch(()=>({detail:`HTTP ${response.status}`}));
-      throw new Error(err.detail || 'RAG query failed');
+  async ragQuery(request: RAGChatPayload): Promise<{
+    response: string;
+    sources: any[];
+    session_id: string;
+    message_count: number;
+    message_id: string;
+  }> {
+    try {
+      const response = await fetchWithAuth(
+        `${this.ragBaseUrl}${API_CONFIG.RAG_API.ENDPOINTS.QUERY}`,
+        { method: "POST", body: JSON.stringify(request) }
+      );
+      if (!response.ok) {
+        const err = await response
+          .json()
+          .catch(() => ({ detail: `HTTP ${response.status}` }));
+        throw new Error(err.detail || "RAG query failed");
+      }
+      return await response.json();
+    } catch (e: any) {
+      if (e.name === "AbortError")
+        throw new Error("RAG request timed out. Please try again.");
+      throw e;
     }
-    return await response.json();
-  } catch (e:any) {
-    if (e.name === "AbortError") throw new Error("RAG request timed out. Please try again.");
-    throw e;
   }
-}
 
   async llmChat(request: LLMChatRequest): Promise<LLMChatResponse> {
     try {
@@ -256,29 +263,39 @@ class UnifiedApiService {
   }
 
   async sendMessage(
-  message: string,
-  modelType: ModelType,
-  options: {
-    k?: number; relevance_threshold?: number;
-    session_id?: string; max_tokens?: number; temperature?: number;
-  } = {},
-  currentMessages?: import('@/types/types').ChatMessage[] // <— pass from hook
-): Promise<{ content: string; sources?: any[]; sessionId?: string; messageCount?: number; messageId?: string; }> {
-  if (modelType === "rag") {
-    const resp = await this.ragQuery({
-      question: message,
-      k: options.k, relevance_threshold: options.relevance_threshold,
-      session_id: options.session_id,
-      messages: currentMessages ? toTurns(currentMessages) : []
-    });
-    return {
-      content: resp.response,
-      sources: resp.sources,
-      sessionId: resp.session_id,
-      messageCount: resp.message_count,
-      messageId: resp.message_id
-    };
-  } else if (modelType === "llm") {
+    message: string,
+    modelType: ModelType,
+    options: {
+      k?: number;
+      relevance_threshold?: number;
+      session_id?: string;
+      max_tokens?: number;
+      temperature?: number;
+    } = {},
+    currentMessages?: ChatMessage[]
+  ): Promise<{
+    content: string;
+    sources?: any[];
+    sessionId?: string;
+    messageCount?: number;
+    messageId?: string;
+  }> {
+    if (modelType === "rag") {
+      const resp = await this.ragQuery({
+        question: message,
+        k: options.k,
+        relevance_threshold: options.relevance_threshold,
+        session_id: options.session_id,
+        messages: currentMessages ? toTurns(currentMessages) : [],
+      });
+      return {
+        content: resp.response,
+        sources: resp.sources,
+        sessionId: resp.session_id,
+        messageCount: resp.message_count,
+        messageId: resp.message_id,
+      };
+    } else if (modelType === "llm") {
       const response = await this.llmChat({
         message,
         session_id: options.session_id,
@@ -289,7 +306,7 @@ class UnifiedApiService {
         content: response.response,
         sessionId: response.session_id,
         messageCount: response.message_count,
-        messageId : response.message_id
+        messageId: response.message_id,
       };
     } else {
       const response = await this.llmChatDemo({
@@ -302,8 +319,72 @@ class UnifiedApiService {
         content: response.response,
         sessionId: response.session_id,
         messageCount: response.message_count,
-        messageId : response.message_id
+        messageId: response.message_id,
       };
+    }
+  }
+
+  // Edit chat message and resend
+  async editMessage(
+    messageId: string,
+    newContent: string,
+    modelType: ModelType,
+    options: {
+      session_id?: string;
+      max_tokens?: number;
+      temperature?: number;
+    } = {}
+  ): Promise<{
+     content: string;
+    sources?: any[];
+    sessionId?: string;
+    messageCount?: number;
+    messageId?: string;
+  }> {
+    try {
+      // ✅ Choose the correct endpoint
+      const url = `${this.llmBaseUrl}${API_CONFIG.LLM_API.ENDPOINTS.EDIT_MESSAGE}`;
+
+      // ✅ Create request body
+      const body = {
+        messageId: messageId,
+        newContent: newContent,
+        model_type: modelType,
+        session_id: options.session_id,
+        max_tokens: options.max_tokens,
+        temperature: options.temperature,
+      };
+
+      // ✅ Send request
+      const response = await fetchWithAuth(url, {
+        method: "POST", // or "POST" depending on your backend
+        body: JSON.stringify(body),
+      });
+
+      // ✅ Handle errors
+      if (!response.ok) {
+        const errorData: ApiError = await response.json().catch(() => ({
+          detail: `HTTP ${response.status}: ${response.statusText}`,
+        }));
+        throw new Error(errorData.detail || "Edit message failed");
+      }
+
+      // ✅ Return updated message
+      const data = await response.json();
+      return {
+        content: data.response,
+        sessionId: data.session_id,
+        messageCount: data.message_count,
+        messageId: data.message_id,
+      };
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.name === "AbortError") {
+          throw new Error("Message edit request timed out. Please try again.");
+        }
+        throw error;
+      }
+      throw new Error("An unexpected error occurred while editing message.");
     }
   }
 
@@ -326,7 +407,7 @@ class UnifiedApiService {
       if (!response.ok) {
         throw new Error(result.message || "Failed to update feedback");
       }
-      
+
       return result;
     } catch (error: any) {
       console.error("Error updating feedback:", error);
@@ -883,11 +964,13 @@ class UnifiedApiService {
       );
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch dashboard data: ${response.statusText}`);
+        throw new Error(
+          `Failed to fetch dashboard data: ${response.statusText}`
+        );
       }
 
       const data = await response.json();
-      return data
+      return data;
     } catch (err) {
       console.error("Error fetching dashboard data:", err);
       return {

@@ -62,6 +62,7 @@ export default function DashboardPage() {
     setSessions,
     fetchSessions,
     regenerateTitle,
+    editAndResendMessage
   } = useUnifiedChat();
   const [input, setInput] = useState("");
   const [selectedModel, setSelectedModel] = useState<ModelType>("rag");
@@ -79,7 +80,6 @@ export default function DashboardPage() {
     user: authUser,
   } = useAuth();
 
- 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
       fetchSessions();
@@ -91,12 +91,11 @@ export default function DashboardPage() {
     if (cookieSessionId && !currentSessionId) {
       loadSessionMessages(cookieSessionId, "main");
     }
-
   }, [loadSessionMessages, currentSessionId]);
 
   // Handle session click
   const handleSessionClick = (sessionId: string) => {
-    console.log('clicked with ses id :',sessionId)
+    console.log("clicked with ses id :", sessionId);
     Cookies.set("sessionId", sessionId);
     loadSessionMessages(sessionId, "main");
   };
@@ -254,6 +253,18 @@ export default function DashboardPage() {
     setSidebarVisible(!sidebarVisible);
   };
 
+const handleEditAndResend = async (messageId: string, newContent: string) => {
+  try {
+    if (!newContent.trim()) return;
+    await editAndResendMessage(messageId, newContent);
+  } catch (error) {
+    console.error("Failed to resend edited message:", error);
+  }
+};
+
+
+
+
   const isCurrentModelConnected =
     selectedModel === "rag" ? ragConnected : llmConnected;
 
@@ -261,7 +272,6 @@ export default function DashboardPage() {
   const modelLabel = selectedModel === "rag" ? "RAG" : "LLM";
   const modelDescription =
     selectedModel === "rag" ? "Knowledge Base" : "Conversational AI";
-
 
   return (
     <ProtectedLayout>
@@ -427,10 +437,7 @@ export default function DashboardPage() {
             <div className="border-t p-4">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <UserMenu
-                    onLogout={handleLogout}
-                    user={authUser}
-                  />
+                  <UserMenu onLogout={handleLogout} user={authUser} />
                 </div>
                 {sidebarVisible && (
                   <div className="ml-2">
@@ -547,7 +554,11 @@ export default function DashboardPage() {
                   </div>
                 )}
                 {messages.map((message) => (
-                  <ChatMessage key={message.id} message={message} />
+                  <ChatMessage
+                    key={message.id}
+                    message={message}
+                    onEditAndResend={handleEditAndResend}
+                  />
                 ))}
               </div>
             </ScrollArea>
