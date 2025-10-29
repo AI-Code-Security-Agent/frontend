@@ -68,14 +68,42 @@
 // }
 
 
+// "use client";
+
+// export function AnimatedBackground() {
+//   return (
+//     <div className="absolute inset-0 overflow-hidden pointer-events-none bg-gradient-to-br -z-10 from-[#010409] via-[#0a0f1a] to-[#0f172a]">
+//       {/* Subtle grid pattern */}
+//       <div
+//         className="absolute inset-0 opacity-[0.07]"
+//         style={{
+//           backgroundImage:
+//             "linear-gradient(to right, #00ffff10 1px, transparent 1px), linear-gradient(to bottom, #00ffff10 1px, transparent 1px)",
+//           backgroundSize: "40px 40px",
+//         }}
+//       />
+
+//       {/* Central glow */}
+//       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-cyan-500/10 blur-[160px]" />
+
+//       {/* Subtle vignette (dark edges) */}
+//       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,#000_100%)]" />
+//     </div>
+//   );
+// }
+
+
 "use client";
 
 export function AnimatedBackground() {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none bg-gradient-to-br -z-10 from-[#010409] via-[#0a0f1a] to-[#0f172a]">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10 transition-colors duration-700">
+      {/* Background gradient changes with theme */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#f9fafb] via-[#e5e7eb] to-[#d1d5db] dark:from-[#010409] dark:via-[#0a0f1a] dark:to-[#0f172a]" />
+
       {/* Subtle grid pattern */}
       <div
-        className="absolute inset-0 opacity-[0.07]"
+        className="absolute inset-0 opacity-[0.07] dark:opacity-[0.07] transition-opacity"
         style={{
           backgroundImage:
             "linear-gradient(to right, #00ffff10 1px, transparent 1px), linear-gradient(to bottom, #00ffff10 1px, transparent 1px)",
@@ -83,12 +111,13 @@ export function AnimatedBackground() {
         }}
       />
 
-      {/* Central glow */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-cyan-500/10 blur-[160px]" />
+      {/* Central glow (only in dark mode) */}
+      <div className="absolute left-1/2 top-1/2 hidden dark:block -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-cyan-500/10 blur-[160px]" />
 
-      {/* Subtle vignette (dark edges) */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,#000_100%)]" />
+      {/* Subtle vignette (dark edges only in dark mode) */}
+      <div className="absolute inset-0 hidden dark:block bg-[radial-gradient(ellipse_at_center,transparent_40%,#000_100%)]" />
     </div>
   );
 }
+
 
