@@ -62,7 +62,7 @@ export default function DashboardPage() {
     setSessions,
     fetchSessions,
     regenerateTitle,
-    editAndResendMessage
+    editAndResendMessage,
   } = useUnifiedChat();
   const [input, setInput] = useState("");
   const [selectedModel, setSelectedModel] = useState<ModelType>("rag");
@@ -253,17 +253,14 @@ export default function DashboardPage() {
     setSidebarVisible(!sidebarVisible);
   };
 
-const handleEditAndResend = async (messageId: string, newContent: string) => {
-  try {
-    if (!newContent.trim()) return;
-    await editAndResendMessage(messageId, newContent);
-  } catch (error) {
-    console.error("Failed to resend edited message:", error);
-  }
-};
-
-
-
+  const handleEditAndResend = async (messageId: string, newContent: string) => {
+    try {
+      if (!newContent.trim()) return;
+      await editAndResendMessage(messageId, newContent);
+    } catch (error) {
+      console.error("Failed to resend edited message:", error);
+    }
+  };
 
   const isCurrentModelConnected =
     selectedModel === "rag" ? ragConnected : llmConnected;
@@ -275,8 +272,8 @@ const handleEditAndResend = async (messageId: string, newContent: string) => {
 
   return (
     <ProtectedLayout>
-      <div className="flex h-screen max-w-full bg-background">
-        <AnimatedBackground />
+      <div className="flex h-screen max-w-full bg-transparent">
+        {/* <AnimatedBackground /> */}
         {sidebarVisible && (
           <div
             className="fixed inset-0 bg-black/50 z-30 md:hidden"
@@ -325,14 +322,25 @@ const handleEditAndResend = async (messageId: string, newContent: string) => {
                 Model Settings
               </Button>
 
-              <Button
+              {authUser?.role === "admin" && (
+                <Button
+                  variant="outline"
+                  className="w-full justify-start mb-3 rounded-full text-sm"
+                  onClick={() => router.push("/dashboard/admin")}
+                >
+                  <ShieldCheck className="mr-2 h-4 w-4" />
+                  Admin Dashboard
+                </Button>
+              )}
+
+              {/* <Button
                 variant="outline"
                 className="w-full justify-start mb-3 rounded-full text-sm"
                 onClick={() => router.push("/dashboard/admin")}
               >
                 <ShieldCheck className="mr-2 h-4 w-4" />
                 Admin Dashboard
-              </Button>
+              </Button> */}
 
               {showSettings && (
                 <ModelSettings
@@ -565,7 +573,7 @@ const handleEditAndResend = async (messageId: string, newContent: string) => {
           </div>
 
           {/* Input Area - Fixed at bottom */}
-          <div className="bg-background">
+          <div className="bg-transparent">
             <div className="max-w-4xl mx-auto p-4">
               <form onSubmit={handleSubmit} className="relative">
                 <div className="flex flex-col bg-background border rounded-3xl shadow-sm hover:shadow-md transition-shadow">

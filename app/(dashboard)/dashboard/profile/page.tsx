@@ -117,40 +117,7 @@ export default function ProfilePage() {
     }
   };
 
-  // const handleProfileImageChange = async (file: File | null) => {
-  //   setSelectedProfileImage(file);
-
-  //   if (file) {
-  //     try {
-  //       // API call to upload profile picture
-  //       const token = Cookies.get("accessToken");
-  //       const formData = new FormData();
-  //       formData.append("profilePicture", file);
-
-  //       const response = await fetch(`${baseURL}/api/profile/picture`, {
-  //         method: "POST",
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         body: formData,
-  //       });
-
-  //       if (!response.ok) {
-  //         throw new Error("Failed to upload profile picture");
-  //       }
-
-  //       const result = await response.json();
-  //       setUser((prev) =>
-  //         prev ? { ...prev, profilePicture: result.profilePicture } : null
-  //       );
-  //       toast.success("Profile picture updated successfully");
-  //     } catch (error) {
-  //       console.error("Error uploading profile picture:", error);
-  //       toast.error("Failed to upload profile picture");
-  //     }
-  //   }
-  // };
-
+ 
   const handleProfileImageChange = async (file: File | null) => {
     setSelectedProfileImage(file);
 
@@ -235,7 +202,7 @@ export default function ProfilePage() {
 
   return (
     <ProtectedLayout>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-transparent ">
         <AnimatedBackground />
         <div className="max-w-4xl mx-auto p-6">
           {/* Header */}

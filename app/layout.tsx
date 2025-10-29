@@ -1,19 +1,21 @@
-import './globals.css';
-import type { Metadata } from 'next';
-import { Inter, Montserrat } from 'next/font/google';
+import "./globals.css";
+import type { Metadata } from "next";
+import { Inter, Montserrat } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
-import { AuthProvider } from '@/components/auth/auth-provider';
+import { AuthProvider } from "@/components/auth/auth-provider";
+import { AnimatedBackground } from "@/components/animated-background";
 
-const inter = Inter({ subsets: ['latin'] });
-const montserrat = Montserrat({ 
-  subsets: ['latin'],
-  variable: '--font-montserrat',
+const inter = Inter({ subsets: ["latin"] });
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-montserrat",
 });
 
 export const metadata: Metadata = {
-  title: 'CodeGuardian - AI-Powered Code Security Analysis',
-  description: 'Analyze your code for security vulnerabilities and get intelligent recommendations to protect your applications.',
+  title: "CodeGuardian - AI-Powered Code Security Analysis",
+  description:
+    "Analyze your code for security vulnerabilities and get intelligent recommendations to protect your applications.",
 };
 
 export default function RootLayout({
@@ -23,7 +25,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} ${montserrat.variable} overflow-x-hidden`}>
+      <body
+        className={`${inter.className} ${montserrat.variable} overflow-x-hidden bg-transparent`}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -31,9 +35,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <main className="relative">
-              {children}
-            </main>
+            <div className="relative min-h-screen">
+              <AnimatedBackground />
+              <main className="relative z-10">{children}</main>
+            </div>
           </AuthProvider>
         </ThemeProvider>
         <Toaster richColors position="top-right" />

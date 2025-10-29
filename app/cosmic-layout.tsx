@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Code } from "lucide-react";
 import Link from "next/link";
-import { CosmicBackground } from '../components/ui/cosmic-background';
+// import { CosmicBackground } from '../components/ui/cosmic-background';
+import { CyberBackground } from '@/components/ui/cosmic-background';
+import { AnimatedBackground } from '@/components/animated-background';
 import { ProjectLogo } from '@/components/ui/ProjectLogo';
 
 interface CosmicLayoutProps {
@@ -18,7 +20,7 @@ export const CosmicLayout: React.FC<CosmicLayoutProps> = ({
   className = "" 
 }) => {
   return (
-    <CosmicBackground className={className}>
+    <CyberBackground className={className}>
       {showHeader && (
         <header className="fixed top-4 left-4 right-4 z-50 mx-auto max-w-6xl">
           <div className="bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl shadow-black/10 dark:shadow-black/30">
@@ -47,6 +49,6 @@ export const CosmicLayout: React.FC<CosmicLayoutProps> = ({
       <main className={`${showHeader ? 'pt-20' : ''}`}>
         {children}
       </main>
-    </CosmicBackground>
+    </CyberBackground>
   );
 };

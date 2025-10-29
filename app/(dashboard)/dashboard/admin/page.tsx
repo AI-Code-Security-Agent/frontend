@@ -370,7 +370,7 @@ export default function AdminDashboard() {
         <Card className="mt-6 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg">
           <ScrollArea className="h-[400px] w-full">
             <Table>
-              <TableCaption>List of all users</TableCaption>
+              <TableCaption>List of all Admins</TableCaption>
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
