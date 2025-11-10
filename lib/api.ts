@@ -37,6 +37,7 @@ export interface RAGChatPayload {
   code_focused?: boolean;
   session_id?: string;
   messages?: { role: "user" | "assistant"; content: string }[];
+  selected_repositories?: string[]; // Updated to match RAG API schema
 }
 
 class UnifiedApiService {
@@ -271,6 +272,7 @@ class UnifiedApiService {
       session_id?: string;
       max_tokens?: number;
       temperature?: number;
+      repository_id?: string; // Keep for backward compatibility
     } = {},
     currentMessages?: ChatMessage[]
   ): Promise<{
@@ -286,6 +288,7 @@ class UnifiedApiService {
         k: options.k,
         relevance_threshold: options.relevance_threshold,
         session_id: options.session_id,
+        selected_repositories: options.repository_id ? [options.repository_id] : undefined, // Convert to array
         messages: currentMessages ? toTurns(currentMessages) : [],
       });
       return {

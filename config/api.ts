@@ -46,7 +46,44 @@ export const API_CONFIG = {
       DASHBOARDDATA: '/admin/dashboard',
     }
   },
-  TIMEOUT: 60000, // 60 seconds
+  REPOSITORIES_API: {
+    BASE_URL: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:4000',
+    ENDPOINTS: {
+      LIST: '/repositories',
+      CONNECT: '/repositories/connect',
+      DISCONNECT: '/repositories', // /:id
+      REINDEX: '/repositories', // /:id/reindex
+      PROGRESS: '/repositories', // /:id/progress
+    }
+  },
+  GITHUB_API: {
+    BASE_URL: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:4000',
+    ENDPOINTS: {
+      INITIATE_AUTH: '/github/auth/initiate',
+      CALLBACK: '/github/auth/callback',
+      STATUS: '/github/status',
+      ACCEPT_TERMS: '/github/terms/accept',
+      REPOSITORIES: '/github/repositories',
+      BRANCHES: '/github/repositories', // /:owner/:repo/branches
+      CONNECT_REPO: '/github/repositories/connect',
+      DISCONNECT_REPO: '/github/repositories', // /:repositoryId
+      DISCONNECT: '/github/disconnect',
+    }
+  },
+  TIMEOUT: 120000, // 60 seconds
+} as const;
+
+// Helper to build API endpoints
+export const API_ENDPOINTS = {
+  REPOSITORIES: {
+    BASE: `${API_CONFIG.REPOSITORIES_API.BASE_URL}${API_CONFIG.REPOSITORIES_API.ENDPOINTS.LIST}`,
+    LIST: `${API_CONFIG.REPOSITORIES_API.BASE_URL}${API_CONFIG.REPOSITORIES_API.ENDPOINTS.LIST}`,
+    CONNECT: `${API_CONFIG.REPOSITORIES_API.BASE_URL}${API_CONFIG.REPOSITORIES_API.ENDPOINTS.CONNECT}`,
+  },
+  CHAT: {
+    QUERY: `${API_CONFIG.RAG_API.BASE_URL}${API_CONFIG.RAG_API.ENDPOINTS.QUERY}`,
+    STREAM: `${API_CONFIG.RAG_API.BASE_URL}${API_CONFIG.RAG_API.ENDPOINTS.QUERY_STREAM}`,
+  }
 } as const;
 
 export type ModelType = 'rag' | 'llm' | 'llm_demo';

@@ -71,6 +71,7 @@ export function useUnifiedChat(options: UseChatOptions = {}) {
         relevance_threshold?: number;
         max_tokens?: number;
         temperature?: number;
+        repository_id?: string; // Add repository_id
       } = {}
     ) => {
       if (!content.trim()) return;
