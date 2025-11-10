@@ -9,16 +9,11 @@ import { ChatMessage } from "@/components/chat/chat-message";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ModelSettings } from "@/components/model-settings";
-<<<<<<< HEAD
-import ConfirmDeleteDialog from "@/components/chat/ConfirmDeleteDialog";
-import { UserMenu } from "@/components/common/UserMenu";
-=======
 import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 import { GitHubIntegrationManager } from '@/components/github/GitHubIntegrationManager';
 import { RepositorySelector } from '@/components/github/RepositorySelector';
 import { IndexingNotification } from '@/components/github/IndexingNotification';
 import { UserMenu } from "@/components/UserMenu";
->>>>>>> github-integration
 import {
   Bot,
   LogOut,
