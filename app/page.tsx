@@ -7,7 +7,7 @@ import Link from "next/link";
 import { CosmicLayout } from "./cosmic-layout";
 import { useState } from "react";
 import { ProjectLogo } from "@/components/common/ProjectLogo";
-import { AnimatedBackground } from "@/components/animated-background";
+import { AnimatedBackground } from "@/components/common/animated-background";
 
 export default function Home() {
   const [showChat, setShowChat] = useState(false);

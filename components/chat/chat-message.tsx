@@ -27,7 +27,7 @@ import { Highlight } from "prism-react-renderer";
 import { apiService } from "@/lib/api";
 // Import the enhanced message formatter
 import { formatContent } from "@/components/MessageFormatter"; // Adjust path as needed
-import { Textarea } from "./ui/textarea";
+import { Textarea } from "../ui/textarea";
 
 interface ChatMessageProps {
   message: ChatMessageType;

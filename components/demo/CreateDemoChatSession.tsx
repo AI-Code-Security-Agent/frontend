@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ChatMessage } from "@/components/chat-message";
+import { ChatMessage } from "@/components/chat/chat-message";
 import { DemoMessageCounter } from "./DemoMessageCounter";
 import { DemoLimitAlert } from "./DemoLimitAlert";
 import {

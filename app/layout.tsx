@@ -4,7 +4,7 @@ import { Inter, Montserrat } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/components/auth/auth-provider";
-import { AnimatedBackground } from "@/components/animated-background";
+import { AnimatedBackground } from "@/components/common/animated-background";
 
 const inter = Inter({ subsets: ["latin"] });
 const montserrat = Montserrat({

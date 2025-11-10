@@ -49,7 +49,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { AnimatedBackground } from "@/components/animated-background";
+import { AnimatedBackground } from "@/components/common/animated-background";
 import { apiService } from "@/lib/api";
 import { AdminDashboardContent, AdminUser } from "@/types/types";
 import ProtectedLayout from "@/components/auth/protected-layout";

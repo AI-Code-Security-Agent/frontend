@@ -23,8 +23,8 @@ import { User, Settings, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import Cookies from "js-cookie";
 import { mockRootProps } from "@/lib/mock-data/profilePageMockData";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { LogoutButton } from "./common/LogoutButton";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { LogoutButton } from "./LogoutButton";
 
 interface User {
   _id: string;

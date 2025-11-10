@@ -17,7 +17,7 @@ import {
   SecurityFormData,
 } from "@/types/types";
 import { apiService } from "@/lib/api";
-import { AnimatedBackground } from "@/components/animated-background";
+import { AnimatedBackground } from "@/components/common/animated-background";
 import ProtectedLayout from "@/components/auth/protected-layout";
 import { useAuth } from "@/components/auth/auth-provider";
 

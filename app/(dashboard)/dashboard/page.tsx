@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { ChatMessage } from "@/components/chat-message";
+import { ChatMessage } from "@/components/chat/chat-message";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ModelSettings } from "@/components/model-settings";
-import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
-import { UserMenu } from "@/components/UserMenu";
+import ConfirmDeleteDialog from "@/components/chat/ConfirmDeleteDialog";
+import { UserMenu } from "@/components/common/UserMenu";
 import {
   Bot,
   LogOut,
@@ -41,7 +41,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { AnimatedBackground } from "@/components/animated-background";
+import { AnimatedBackground } from "@/components/common/animated-background";
 import ProtectedLayout from "@/components/auth/protected-layout";
 import { useAuth } from "@/components/auth/auth-provider";
 import { LogoutButton } from "@/components/common/LogoutButton";
