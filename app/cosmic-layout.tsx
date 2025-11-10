@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Code } from "lucide-react";
 import Link from "next/link";
-// import { CosmicBackground } from '../components/ui/cosmic-background';
-import { CyberBackground } from '@/components/ui/cosmic-background';
+import { CyberBackground } from '@/components/common/cyber-background';
 import { AnimatedBackground } from '@/components/common/animated-background';
 import { ProjectLogo } from '@/components/common/ProjectLogo';
 
@@ -22,7 +21,7 @@ export const CosmicLayout: React.FC<CosmicLayoutProps> = ({
   return (
     <CyberBackground className={className}>
       {showHeader && (
-        <header className="fixed top-4 left-4 right-4 z-50 mx-auto max-w-6xl">
+        <header className="fixed top-2 left-4 right-4 z-50 mx-auto max-w-6xl">
           <div className="bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl shadow-black/10 dark:shadow-black/30">
             <div className="flex h-14 items-center justify-between px-6 sm:px-8 lg:px-10">
               <Link
