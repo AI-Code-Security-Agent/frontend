@@ -10,7 +10,7 @@ import { Code, Mail, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { CosmicLayout } from "@/app/cosmic-layout";
-import { ProjectLogo } from "@/components/ui/ProjectLogo";
+import { ProjectLogo } from "@/components/common/ProjectLogo";
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export default function ForgotPasswordPage() {

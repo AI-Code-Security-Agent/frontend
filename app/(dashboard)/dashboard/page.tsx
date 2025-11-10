@@ -44,6 +44,8 @@ import {
 import { AnimatedBackground } from "@/components/animated-background";
 import ProtectedLayout from "@/components/auth/protected-layout";
 import { useAuth } from "@/components/auth/auth-provider";
+import { LogoutButton } from "@/components/common/LogoutButton";
+import { ProjectLogo } from "@/components/common/ProjectLogo";
 
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -288,7 +290,8 @@ export default function DashboardPage() {
         >
           <div className="flex h-14 items-center justify-between border-b px-4">
             <div className="flex items-center">
-              <Bot className="h-6 w-6" />
+              {/* <Bot className="h-6 w-6" /> */}
+              <ProjectLogo size="sm" clickable={false} />
               <span className="ml-2 font-bold">Code Guardian</span>
             </div>
             <Button
@@ -303,7 +306,7 @@ export default function DashboardPage() {
 
           <div className="flex flex-col h-[calc(100vh-3.5rem)]">
             <div className="flex-1 overflow-auto p-4">
-              <Button
+              {/* <Button
                 variant="outline"
                 className="w-full justify-start mb-2 rounded-full text-sm"
                 onClick={clearChat}
@@ -313,14 +316,6 @@ export default function DashboardPage() {
                 New Chat
               </Button>
 
-              <Button
-                variant="outline"
-                className="w-full justify-start mb-3 rounded-full text-sm"
-                onClick={() => setShowSettings(!showSettings)}
-              >
-                <Settings className="mr-2 h-4 w-4" />
-                Model Settings
-              </Button>
 
               {authUser?.role === "admin" && (
                 <Button
@@ -331,16 +326,37 @@ export default function DashboardPage() {
                   <ShieldCheck className="mr-2 h-4 w-4" />
                   Admin Dashboard
                 </Button>
-              )}
+              )} */}
 
-              {/* <Button
+              <Button
                 variant="outline"
-                className="w-full justify-start mb-3 rounded-full text-sm"
-                onClick={() => router.push("/dashboard/admin")}
+                className={`w-full justify-start mb-2 rounded-full text-sm transition-all ${
+                  !sidebarVisible ? "justify-center px-2" : ""
+                }`}
+                onClick={clearChat}
+                disabled={isLoading}
+                title="New Chat"
               >
-                <ShieldCheck className="mr-2 h-4 w-4" />
-                Admin Dashboard
-              </Button> */}
+                <MessageSquarePlus className="h-4 w-4" />
+                {sidebarVisible && <span className="ml-2">New Chat</span>}
+              </Button>
+
+              {/* ✅ Admin Dashboard (only for admins) */}
+              {authUser?.role === "admin" && (
+                <Button
+                  variant="outline"
+                  className={`w-full justify-start mb-3 rounded-full text-sm transition-all ${
+                    !sidebarVisible ? "justify-center px-2" : ""
+                  }`}
+                  onClick={() => router.push("/dashboard/admin")}
+                  title="Admin Dashboard"
+                >
+                  <ShieldCheck className="h-4 w-4" />
+                  {sidebarVisible && (
+                    <span className="ml-2">Admin Dashboard</span>
+                  )}
+                </Button>
+              )}
 
               {showSettings && (
                 <ModelSettings
@@ -409,7 +425,7 @@ export default function DashboardPage() {
                       {/* UPDATED: Action buttons - shown on hover */}
                       <div className="absolute right-2 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         {/* NEW: Regenerate title button */}
-                        <button
+                        {/* <button
                           className="text-blue-500 hover:text-blue-700 p-1 rounded"
                           title="Regenerate title"
                           onClick={(e) => {
@@ -418,7 +434,7 @@ export default function DashboardPage() {
                           }}
                         >
                           <RotateCcw className="h-3 w-3" />
-                        </button>
+                        </button> */}
 
                         {/* Delete button */}
                         <ConfirmDeleteDialog
@@ -471,20 +487,13 @@ export default function DashboardPage() {
                 >
                   <Menu className="h-4 w-4" />
                 </Button>
-                <Bot className="h-6 w-6" />
+                {/* <Bot className="h-6 w-6" /> */}
+                <ProjectLogo size="sm" clickable={false} />
                 <span className="ml-2 font-bold">Code Guardian</span>
               </div>
               <div className="flex items-center space-x-2">
                 <ThemeToggle />
-                <Button
-                  variant="ghost"
-                  title="Log Out"
-                  size="icon"
-                  onClick={handleLogout}
-                  className="cursor-pointer"
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
+                <LogoutButton onConfirm={handleLogout} asIcon />
               </div>
             </div>
           )}

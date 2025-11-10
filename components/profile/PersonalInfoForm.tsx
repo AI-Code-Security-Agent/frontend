@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import React from "react";
+import { useForm } from "react-hook-form";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Form,
   FormField,
@@ -12,9 +12,9 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from '@/components/ui/form';
-import { User, Mail, Save } from 'lucide-react';
-import { toast } from 'sonner';
+} from "@/components/ui/form";
+import { User, Mail, Save } from "lucide-react";
+import { toast } from "sonner";
 
 interface PersonalInfoFormData {
   fullname: string;
@@ -27,10 +27,10 @@ interface PersonalInfoFormProps {
   isLoading?: boolean;
 }
 
-export function PersonalInfoForm({ 
-  initialData, 
-  onSubmit, 
-  isLoading = false 
+export function PersonalInfoForm({
+  initialData,
+  onSubmit,
+  isLoading = false,
 }: PersonalInfoFormProps) {
   const form = useForm<PersonalInfoFormData>({
     defaultValues: initialData,
@@ -40,9 +40,9 @@ export function PersonalInfoForm({
     try {
       console.log("Submitting personal info:", data);
       await onSubmit(data);
-      toast.success('Profile updated successfully');
+      toast.success("Profile updated successfully");
     } catch (error) {
-      toast.error('Failed to update profile');
+      toast.error("Failed to update profile");
     }
   };
 
@@ -58,17 +58,20 @@ export function PersonalInfoForm({
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-4"
+          >
             <div className="grid grid-cols-1  gap-4">
               <FormField
                 control={form.control}
                 name="fullname"
                 rules={{
-                  required: 'Full name is required',
+                  required: "Full name is required",
                   minLength: {
                     value: 2,
-                    message: 'Full name must be at least 2 characters'
-                  }
+                    message: "Full name must be at least 2 characters",
+                  },
                 }}
                 render={({ field }) => (
                   <FormItem>
@@ -115,31 +118,32 @@ export function PersonalInfoForm({
               )}
             /> */}
 
-             <div>
+            <div>
               <FormLabel className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
                 Email
               </FormLabel>
-              <Input
-                type="email"
-                value={initialData.email}
-                disabled
-                readOnly
-              />
+              <Input type="email" value={initialData.email} disabled readOnly />
             </div>
 
             <div className="flex gap-2 pt-4">
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={isLoading || !form.formState.isValid}
-                className="flex items-center text-black gap-2 hover:bg-green-500 hover:text-white"
+                className="
+                          flex items-center gap-2
+                          bg-green-500 text-white
+                          hover:bg-green-600
+                          dark:bg-green-400 dark:hover:bg-green-500
+                          transition-colors
+                        "
               >
                 <Save className="h-4 w-4" />
-                {isLoading ? 'Saving...' : 'Save Changes'}
+                {isLoading ? "Saving..." : "Save Changes"}
               </Button>
-              
-              <Button 
-                type="button" 
+
+              <Button
+                type="button"
                 variant="outline"
                 onClick={() => form.reset()}
                 disabled={isLoading}

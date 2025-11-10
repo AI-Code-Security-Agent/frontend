@@ -23,8 +23,8 @@ import { User, Settings, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import Cookies from "js-cookie";
 import { mockRootProps } from "@/lib/mock-data/profilePageMockData";
-import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { LogoutButton } from "./common/LogoutButton";
 
 interface User {
   _id: string;
@@ -119,15 +119,17 @@ export function UserMenu({
               Profile
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DialogTrigger asChild>
+            {/* <DialogTrigger asChild>
               <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive">
                 <LogOut className="mr-2 h-4 w-4" />
                 Logout
               </DropdownMenuItem>
             </DialogTrigger>
-          </DropdownMenuContent>
+         */}
+          <LogoutButton onConfirm={onLogout} />
+           </DropdownMenuContent> 
         </DropdownMenu>
-
+{/* 
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Confirm Logout</DialogTitle>
@@ -152,7 +154,8 @@ export function UserMenu({
               {isLoggingOut ? "Logging out..." : "Yes, Logout"}
             </Button>
           </DialogFooter>
-        </DialogContent>
+        </DialogContent> */}
+
       </Dialog>
     </div>
   );

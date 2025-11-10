@@ -6,7 +6,7 @@ import { Shield, ArrowRight, Code, Lock, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { CosmicLayout } from "./cosmic-layout";
 import { useState } from "react";
-import { ProjectLogo } from "@/components/ui/ProjectLogo";
+import { ProjectLogo } from "@/components/common/ProjectLogo";
 import { AnimatedBackground } from "@/components/animated-background";
 
 export default function Home() {

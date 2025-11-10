@@ -22,7 +22,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
 import { mockRootProps } from "@/lib/mock-data/demoMockData";
-import { ProjectLogo } from "../ui/ProjectLogo";
+import { ProjectLogo } from "../common/ProjectLogo";
 import Cookies from "js-cookie";
 
 interface CreateDemoChatSessionProps {

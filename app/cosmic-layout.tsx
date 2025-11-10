@@ -6,7 +6,7 @@ import Link from "next/link";
 // import { CosmicBackground } from '../components/ui/cosmic-background';
 import { CyberBackground } from '@/components/ui/cosmic-background';
 import { AnimatedBackground } from '@/components/animated-background';
-import { ProjectLogo } from '@/components/ui/ProjectLogo';
+import { ProjectLogo } from '@/components/common/ProjectLogo';
 
 interface CosmicLayoutProps {
   children: React.ReactNode;

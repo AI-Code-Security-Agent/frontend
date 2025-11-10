@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { Mail, Lock } from "lucide-react";
 import { CosmicLayout } from "@/app/cosmic-layout";
-import { ProjectLogo } from "@/components/ui/ProjectLogo";
+import { ProjectLogo } from "@/components/common/ProjectLogo";
 import { useAuth } from "@/components/auth/auth-provider";
 
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;

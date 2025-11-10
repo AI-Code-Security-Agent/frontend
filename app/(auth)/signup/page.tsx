@@ -12,7 +12,7 @@ import { UserTypes } from "@/types/types";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { CosmicLayout } from "@/app/cosmic-layout";
-import { ProjectLogo } from "@/components/ui/ProjectLogo";
+import { ProjectLogo } from "@/components/common/ProjectLogo";
 
 export default function SignUpPage() {
 
