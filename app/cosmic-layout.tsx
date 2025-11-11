@@ -29,7 +29,7 @@ export const CosmicLayout: React.FC<CosmicLayoutProps> = ({
                   className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
                 >
                   <ProjectLogo size="md" clickable={false} />
-                  <span className="font-bold text-gray-900 dark:text-white">CodeGuardian</span>
+                  <span className="font-bold text-gray-900 dark:text-white">CodeShield</span>
                 </Link>
               <div className="flex items-center space-x-4">
                 <Link href="/login">

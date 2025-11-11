@@ -36,7 +36,7 @@ export function ProjectLogo({
       <div className="relative">
         <Image
           src="/logo.png"
-          alt="CodeGuardian Logo"
+          alt="CodeShield Logo"
           width={config.width}
           height={config.height}
           className="object-cover rounded-full" 

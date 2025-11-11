@@ -116,7 +116,7 @@ useEffect(() => {
             <ProjectLogo size="xl" clickable={true} className="mx-auto" />
           </div>
           <h1 className="text-2xl font-semibold tracking-tight">
-            CodeGuardian
+            CodeShield
           </h1>
           <p className="text-sm text-muted-foreground">Please reset your password.</p>
         </div>

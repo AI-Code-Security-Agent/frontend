@@ -56,7 +56,7 @@ export default function ForgotPasswordPage() {
             <ProjectLogo size="xl" clickable={true} className="mx-auto" />
           </div>
           <h1 className="text-2xl font-semibold tracking-tight">
-            CodeGuardian
+            CodeShield
           </h1>
           <p className="text-sm text-muted-foreground">
             Enter your email to reset your password.

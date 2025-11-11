@@ -155,7 +155,7 @@ export function CreateDemoChatSession({
             className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
           >
             <ProjectLogo size="sm" clickable={false} />
-            <span className="font-bold text-foreground">CodeGuardian</span>
+            <span className="font-bold text-foreground">CodeShield</span>
           </Link>
           <div className="flex items-center space-x-2">
             <DemoMessageCounter

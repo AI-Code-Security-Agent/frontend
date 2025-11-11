@@ -85,7 +85,7 @@ export default function SignUpPage() {
             <ProjectLogo size="xl" clickable={true} className="mx-auto" />
           </div>
           <h1 className="text-2xl font-semibold tracking-tight">
-            Join CodeGuardian
+            Join CodeShield
           </h1>
           <p className="text-sm text-muted-foreground">
             Start analyzing your code for security vulnerabilities
@@ -158,7 +158,7 @@ export default function SignUpPage() {
                   size="lg"
                   disabled={isLoading}
                 >
-                  {isLoading ? "Creating account..." : "Complete Registration"}
+                  {isLoading ? "Creating account..." : "Register Account"}
                 </Button>
               </CardContent>
             </form>

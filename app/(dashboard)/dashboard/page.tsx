@@ -399,7 +399,6 @@ export default function DashboardPage() {
 
               <Separator className="my-4" />
 
-              {/* UPDATED: Chat history with regenerate title functionality */}
               <div className="mt-4 space-y-2">
                 <h2 className="text-sm font-semibold px-2">Chat History</h2>
                 <div className="space-y-1 max-h-[350px] overflow-y-auto pr-1 scrollbar-hide relative">
@@ -410,33 +409,18 @@ export default function DashboardPage() {
                     >
                       <Button
                         variant="ghost"
-                        className={`flex-1 justify-start text-xs truncate pr-16 ${
+                        className={`flex-1 text-left justify-start text-xs truncate pr-2 transition-all duration-300 ${
                           session._id === currentSessionId ? "bg-muted" : ""
                         }`}
                         onClick={() => handleSessionClick(session._id)}
                         title={session.title || "Untitled Session"}
                       >
-                        {/* <MessageSquarePlus className="mr-2 h-4 w-4 flex-shrink-0" /> */}
-                        <span className="truncate">
+                        <span className="truncate block w-full group-hover:w-[calc(100%-2rem)] transition-all duration-300">
                           {session.title || "Untitled Session"}
                         </span>
                       </Button>
 
-                      {/* UPDATED: Action buttons - shown on hover */}
-                      <div className="absolute right-2 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {/* NEW: Regenerate title button */}
-                        {/* <button
-                          className="text-blue-500 hover:text-blue-700 p-1 rounded"
-                          title="Regenerate title"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRegenerateTitle(session._id);
-                          }}
-                        >
-                          <RotateCcw className="h-3 w-3" />
-                        </button> */}
-
-                        {/* Delete button */}
+                      <div className="absolute right-2 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <ConfirmDeleteDialog
                           onConfirm={() => handleDeleteSession(session._id)}
                           description="This will permanently delete the session and its chat history."

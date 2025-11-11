@@ -34,7 +34,7 @@ export default function Home() {
         <AnimatedBackground />
         <div className="min-h-screen  relative overflow-hidden">
           {/* Hero Section */}
-          <section className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-20">
+          <section className="relative z-10  flex flex-col items-center justify-center px-4 py-20">
             <div className="max-w-4xl mx-auto text-center space-y-8">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm">
                 <Shield className="h-4 w-4 text-blue-400" />

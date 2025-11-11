@@ -64,7 +64,7 @@ export default function LoginPage() {
           <div className="text-center space-y-2 mt-20">
             <ProjectLogo size="xl" clickable={true} className="mx-auto" />
             <h1 className="text-2xl font-semibold">
-              Welcome back to CodeGuardian
+              Welcome back to CodeShield
             </h1>
             <p className="text-sm text-muted-foreground">
               Access your code security dashboard
@@ -128,7 +128,7 @@ export default function LoginPage() {
             <CardFooter className="flex flex-col space-y-4 border-t pt-6">
               <div className="flex justify-between w-full text-sm">
                 <span>
-                  New to CodeGuardian?{" "}
+                  New to CodeShield?{" "}
                   <Link
                     href="/signup"
                     className="font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:underline"

@@ -13,7 +13,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "CodeGuardian - AI-Powered Code Security Analysis",
+  title: "CodeShield - AI-Powered Code Security Analysis",
   description:
     "Analyze your code for security vulnerabilities and get intelligent recommendations to protect your applications.",
 };
