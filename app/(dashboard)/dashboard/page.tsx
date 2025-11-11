@@ -9,8 +9,11 @@ import { ChatMessage } from "@/components/chat/chat-message";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ModelSettings } from "@/components/model-settings";
-import ConfirmDeleteDialog from "@/components/chat/ConfirmDeleteDialog";
-import { UserMenu } from "@/components/common/UserMenu";
+import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
+import { GitHubIntegrationManager } from '@/components/github/GitHubIntegrationManager';
+import { RepositorySelector } from '@/components/github/RepositorySelector';
+import { IndexingNotification } from '@/components/github/IndexingNotification';
+import { UserMenu } from "@/components/UserMenu";
 import {
   Bot,
   LogOut,
@@ -74,6 +77,7 @@ export default function DashboardPage() {
   const [showSettings, setShowSettings] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
+  const [selectedRepository, setSelectedRepository] = useState<any>(null);
 
   const {
     isAuthenticated,
@@ -237,7 +241,13 @@ export default function DashboardPage() {
     setInput("");
 
     const settings = selectedModel === "rag" ? ragSettings : llmSettings;
-    await sendMessage(message, selectedModel, settings);
+    
+    // Add repository_id to settings if in RAG mode and repository is selected
+    const enhancedSettings = selectedModel === "rag" && selectedRepository?.ragRepositoryId
+      ? { ...settings, repository_id: selectedRepository.ragRepositoryId }
+      : settings;
+    
+    await sendMessage(message, selectedModel, enhancedSettings);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -275,6 +285,9 @@ export default function DashboardPage() {
   return (
     <ProtectedLayout>
       <div className="flex h-screen max-w-full bg-transparent">
+        <div className="absolute top-4 right-4 z-50">
+            <GitHubIntegrationManager />
+          </div>
         {/* <AnimatedBackground /> */}
         {sidebarVisible && (
           <div
@@ -500,6 +513,38 @@ export default function DashboardPage() {
                 </Button>
               </AlertDescription>
             </Alert>
+          )}
+
+          {/* Repository Selector - Only show in RAG mode */}
+          {selectedModel === "rag" && (
+            <div className="px-4 pt-4">
+              <div className="max-w-4xl mx-auto">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm font-medium text-muted-foreground">
+                    Active Repository:
+                  </span>
+                  <RepositorySelector 
+                    onRepositoryChange={setSelectedRepository}
+                  />
+                </div>
+                {!selectedRepository && (
+                  <Alert className="mt-2">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      Please select a repository to query from. Connect repositories via GitHub integration.
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Indexing Notifications */}
+          {selectedRepository && (
+            <IndexingNotification
+              repositoryId={selectedRepository.ragRepositoryId}
+              repositoryName={selectedRepository.name}
+            />
           )}
 
           {/* Chat Messages Area */}
