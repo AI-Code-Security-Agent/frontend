@@ -38,6 +38,7 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
   const [repositories, setRepositories] = useState<ConnectedRepository[]>([]);
   const [selectedRepo, setSelectedRepo] = useState<ConnectedRepository | null>(null);
   const [loading, setLoading] = useState(false);
+  const [githubConnected, setGithubConnected] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -63,6 +64,7 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
     try {
       const response = await githubService.getConnectedRepositories();
       setRepositories(response.repositories);
+      setGithubConnected(response.githubConnected || false);
       
       // Set selected repository from backend
       if (response.selectedRepository) {
@@ -79,6 +81,7 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
       }
     } catch (error: any) {
       console.error('Failed to load repositories:', error);
+      // Don't show error toast - repositories might just not be available yet
     }
   };
 
@@ -166,6 +169,7 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
                 </span>
                 <span className="text-xs text-muted-foreground truncate max-w-[180px]">
                   {selectedRepo.branch}
+                  {!githubConnected && ' • (GitHub Disconnected)'}
                 </span>
               </div>
               {getStatusIcon(selectedRepo.indexingStatus)}
@@ -177,7 +181,10 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[320px]">
-        <DropdownMenuLabel>Connected Repositories</DropdownMenuLabel>
+        <DropdownMenuLabel>
+          Connected Repositories
+          {!githubConnected && ' (GitHub Disconnected)'}
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         
         {repositories.map((repo) => (

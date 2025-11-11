@@ -123,11 +123,14 @@ export const GitHubConnectButton: React.FC<GitHubConnectButtonProps> = ({
   const handleDisconnect = async () => {
     try {
       await githubService.disconnect();
-      await checkGitHubStatus();
+      
+      // Force status refresh
+      setStatus({ connected: false });
+      onConnectionChange?.(false);
       
       toast({
         title: 'GitHub Disconnected',
-        description: 'Successfully disconnected your GitHub account.',
+        description: 'Your repositories remain available for queries.',
       });
     } catch (error: any) {
       console.error('Failed to disconnect GitHub:', error);

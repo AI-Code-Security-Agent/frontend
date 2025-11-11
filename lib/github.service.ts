@@ -194,6 +194,7 @@ class GitHubService {
       progress: number;
     }>;
     selectedRepository: any;
+    githubConnected: boolean;
   }> {
     const response = await fetchWithAuth(
       `${API_BASE_URL}/github/repositories/connected`
@@ -201,6 +202,14 @@ class GitHubService {
     
     if (!response.ok) {
       const error = await response.json();
+      // If GitHub not connected but repositories exist, return empty array
+      if (response.status === 404 || error.error === 'GitHub not connected') {
+        return {
+          repositories: [],
+          selectedRepository: null,
+          githubConnected: false
+        };
+      }
       throw new Error(error.error || 'Failed to fetch connected repositories');
     }
     
