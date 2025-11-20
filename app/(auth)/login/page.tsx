@@ -11,6 +11,8 @@ import { CosmicLayout } from "@/app/cosmic-layout";
 import { ProjectLogo } from "@/components/common/ProjectLogo";
 import { useAuth } from "@/components/auth/auth-provider";
 
+
+
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
 function GoogleSignInButton() {
@@ -58,10 +60,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background/95">
+    <div className="min-h-screen flex items-center justify-center bg-background/95 overflow-hidden">
       <CosmicLayout>
-        <div className="mx-auto w-full sm:w-[400px] space-y-6">
-          <div className="text-center space-y-2 mt-20">
+        <div className="mx-auto w-full max-w-md space-y-6">
+          <div className="text-center space-y-2 mt-2">
             <ProjectLogo size="xl" clickable={true} className="mx-auto" />
             <h1 className="text-2xl font-semibold">
               Welcome back to CodeShield
@@ -71,8 +73,8 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <Card className="border-2">
-            <CardContent className="pt-6 space-y-4">
+          <Card className="border-2 shadow-xl p-2">
+            <CardContent className="pt-2 space-y-4">
               <form onSubmit={handleUserLogin} className="space-y-4">
                 <div>
                   <Label htmlFor="email">Email</Label>

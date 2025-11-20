@@ -15,7 +15,6 @@ import { CosmicLayout } from "@/app/cosmic-layout";
 import { ProjectLogo } from "@/components/common/ProjectLogo";
 
 export default function SignUpPage() {
-
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showUserForm, setShowUserForm] = useState(false);
@@ -35,13 +34,10 @@ export default function SignUpPage() {
   //   }, 1500);
   // };
 
-  const hndleCreateUser = async(e: React.FormEvent) => {
+  const hndleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    if (
-      !newUserDetails.fullname ||
-      !newUserDetails.email
-    ) {
+    if (!newUserDetails.fullname || !newUserDetails.email) {
       toast.warning("Please Fill all the fields.");
       setIsLoading(false);
       return;
@@ -52,48 +48,49 @@ export default function SignUpPage() {
       gitAccessToken: "not define",
     };
 
-   try {
-    const response = await fetch(`${baseURL}/users/createuser?role=user`,{
-      method:"POST",
-      headers : {
-        "Content-Type" : "application/json"
-      },
-      body : JSON.stringify(payload)
-    });
+    try {
+      const response = await fetch(`${baseURL}/users/createuser?role=user`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
-    const result = await response.json();
-    if(result.isSuccess) {
-      toast.success(result.message + " please check your email to get your password.");
-      router.push("/login");
-    }else {
-      toast.error(result.message || "Failed to create User.")
+      const result = await response.json();
+      if (result.isSuccess) {
+        toast.success(
+          result.message + " please check your email to get your password."
+        );
+        router.push("/login");
+      } else {
+        toast.error(result.message || "Failed to create User.");
+      }
+    } catch (err) {
+      toast.error("An error occurred while creating the user.");
+    } finally {
+      setIsLoading(false);
     }
-    
-   } catch (err) {
-    toast.error("An error occurred while creating the user.");
-   }finally{
-    setIsLoading(false)
-   }
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-background/95 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background/95 overflow-hidden">
       <CosmicLayout>
-      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[400px]">
-        <div className="flex flex-col space-y-2 text-center">
-          <div className="flex items-center justify-center mt-20">
-            <ProjectLogo size="xl" clickable={true} className="mx-auto" />
+        <div className="mx-auto w-full max-w-md space-y-6">
+          <div className="text-center space-y-2 mt-2">
+            
+              <ProjectLogo size="xl" clickable={true} className="mx-auto" />
+            
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Join CodeShield
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Start analyzing your code for security vulnerabilities
+            </p>
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Join CodeShield
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Start analyzing your code for security vulnerabilities
-          </p>
-        </div>
 
-        <Card className="border-2">
-          {/* {!showUserForm ? ( */}
+          <Card className="border-2 shadow-xl p-2">
+            {/* {!showUserForm ? ( */}
             {/* <CardContent className="pt-6">
               <Button
                 className="w-full font-medium flex items-center justify-center"
@@ -109,9 +106,9 @@ export default function SignUpPage() {
                 repositories
               </p>
             </CardContent> */}
-          {/* ) : ( */}
+            {/* ) : ( */}
             <form onSubmit={hndleCreateUser}>
-              <CardContent className="grid gap-4 pt-6">
+              <CardContent className="grid gap-2 pt-2">
                 {/* <div className="flex items-center justify-center text-sm text-green-600 mb-2">
                   <Github className="mr-2 h-5 w-5" />
                   GitHub Connected Successfully
@@ -129,7 +126,12 @@ export default function SignUpPage() {
                       placeholder="Enter Your Full name"
                       className="pl-10"
                       value={newUserDetails.fullname}
-                      onChange={(e) => setNewUserDetails({...newUserDetails,fullname:e.target.value})}
+                      onChange={(e) =>
+                        setNewUserDetails({
+                          ...newUserDetails,
+                          fullname: e.target.value,
+                        })
+                      }
                     />
                   </div>
                 </div>
@@ -148,7 +150,12 @@ export default function SignUpPage() {
                       placeholder="Enater Your E-mail"
                       required
                       value={newUserDetails.email}
-                      onChange={(e) => setNewUserDetails({...newUserDetails,email:e.target.value})}
+                      onChange={(e) =>
+                        setNewUserDetails({
+                          ...newUserDetails,
+                          email: e.target.value,
+                        })
+                      }
                     />
                   </div>
                 </div>
@@ -162,38 +169,38 @@ export default function SignUpPage() {
                 </Button>
               </CardContent>
             </form>
-          {/* )} */}
-          <CardFooter className="flex flex-col space-y-4 border-t pt-6">
-            <div className="text-sm text-muted-foreground text-center">
-              Already have an account?{" "}
-              <Link
-                href="/login"
-                className="font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:underline"
-              >
-                Sign in
-              </Link>
-            </div>
-          </CardFooter>
-        </Card>
+            {/* )} */}
+            <CardFooter className="flex flex-col space-y-4 border-t pt-6">
+              <div className="text-sm text-muted-foreground text-center">
+                Already have an account?{" "}
+                <Link
+                  href="/login"
+                  className="font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:underline"
+                >
+                  Sign in
+                </Link>
+              </div>
+            </CardFooter>
+          </Card>
 
-        <p className="px-8 text-center text-sm text-muted-foreground">
-          By clicking continue, you agree to our{" "}
-          <Link
-            href="/terms"
-            className="hover:text-primary underline underline-offset-4"
-          >
-            Terms of Service
-          </Link>{" "}
-          and{" "}
-          <Link
-            href="/privacy"
-            className="hover:text-primary underline underline-offset-4"
-          >
-            Privacy Policy
-          </Link>
-          .
-        </p>
-      </div>
+          <p className="px-8 text-center text-sm text-muted-foreground">
+            By clicking continue, you agree to our{" "}
+            <Link
+              href="/terms"
+              className="hover:text-primary underline underline-offset-4"
+            >
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link
+              href="/privacy"
+              className="hover:text-primary underline underline-offset-4"
+            >
+              Privacy Policy
+            </Link>
+            .
+          </p>
+        </div>
       </CosmicLayout>
     </div>
   );
